@@ -13,6 +13,7 @@ namespace FactioServer
         public ScenarioRegistry scenarioRegistry;
 
         public bool requestedExit = false;
+        public bool debugTicks = false;
 
         public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
         public List<FactioPlayer> players = new List<FactioPlayer>();
@@ -69,6 +70,18 @@ namespace FactioServer
                 case "help":
                     Console.WriteLine("[Core] Commands: ");
                     Console.WriteLine("\texit: Closes the server");
+                    Console.WriteLine("\tdebug ticks: Toggles tick debugging");
+                    Console.WriteLine("\tclear: Clears console");
+                    break;
+                case "debug ticks":
+                    debugTicks = !debugTicks;
+                    if (debugTicks)
+                        Console.WriteLine("[Core] Tick debugging enabled.");
+                    else
+                        Console.WriteLine("[Core] Tick debugging disabled.");
+                    break;
+                case "clear":
+                    Console.Clear();
                     break;
                 default:
                     Console.WriteLine("[Core] Unknown command: " + command);

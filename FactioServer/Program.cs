@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace FactioServer
@@ -7,15 +8,30 @@ namespace FactioServer
     class Program
     {
         public const double TPS = 1;
-        public const long SystemTPS = 1000000000;
-        public const long TimePerTick = (long)(SystemTPS / TPS);
 
         static void Main(string[] args)
         {
-
             Console.WriteLine("[Core] Hello World!");
             Console.WriteLine("[Core] Factio Server v0.1");
             Console.WriteLine("[Core] Starting server...");
+
+            long SystemTPS;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                SystemTPS = 10000000;
+                Console.WriteLine("[Core] Oooooo, Windows!");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                SystemTPS = 1000000000;
+                Console.WriteLine("[Core] Oooooo, Linux!");
+            }
+            else
+            {
+                Console.WriteLine("[Core] Unsupported OS detected! Stopping!");
+                return;
+            }
+            long TimePerTick = (long)(SystemTPS / TPS);
 
             FactioServer factioServer = new FactioServer();
 
@@ -39,7 +55,7 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    //Console.WriteLine("Tick: " + nextTickId);
+                    if (factioServer.debugTicks) Console.WriteLine("Tick: " + nextTickId);
                     nextTickId++;
                 }
                 Thread.Sleep(1);
