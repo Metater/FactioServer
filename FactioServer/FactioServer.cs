@@ -66,6 +66,10 @@ namespace FactioServer
                     requestedExit = true;
                     Console.WriteLine("[Core] Exiting.");
                     break;
+                case "help":
+                    Console.WriteLine("[Core] Commands: ");
+                    Console.WriteLine("\texit: Closes the server");
+                    break;
                 default:
                     Console.WriteLine("[Core] Unknown command: " + command);
                     break;
