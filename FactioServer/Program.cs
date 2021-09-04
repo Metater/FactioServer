@@ -49,7 +49,7 @@ namespace FactioServer
                     char c = key.KeyChar;
                     if (c == 13) // Is newline
                     {
-                        factioServer.Command(input);
+                        if (input != "") factioServer.Command(input);
                         input = "";
                     }
                     else
