@@ -14,6 +14,7 @@ namespace FactioServer
 
         public bool requestedExit = false;
         public bool debugTicks = false;
+        public int pollRate = 1; // could add command for adjusting later
 
         public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
         public List<FactioPlayer> players = new List<FactioPlayer>();

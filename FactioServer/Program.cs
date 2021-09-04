@@ -12,7 +12,7 @@ namespace FactioServer
         static void Main(string[] args)
         {
             Console.WriteLine("[Core] Hello World!");
-            Console.WriteLine("[Core] Factio Server v0.1");
+            Console.WriteLine("[Core] Factio Server v0.2");
             Console.WriteLine("[Core] Starting server...");
 
             long SystemTPS;
@@ -55,10 +55,9 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    if (factioServer.debugTicks) Console.WriteLine("Tick: " + nextTickId);
+                    if (factioServer.debugTicks) Console.WriteLine("[Core] Tick: " + nextTickId);
                     nextTickId++;
                 }
-                Thread.Sleep(1);
                 if (Console.KeyAvailable)
                 {
                     ConsoleKeyInfo key = Console.ReadKey();
@@ -66,6 +65,7 @@ namespace FactioServer
                     if (c == 13) // Is newline
                     {
                         if (input != "") factioServer.Command(input);
+                        else Console.WriteLine();
                         input = "";
                     }
                     else if (c == 8) // Is backspace
@@ -73,6 +73,7 @@ namespace FactioServer
                     else
                         input += c;
                 }
+                Thread.Sleep(factioServer.pollRate);
                 running = !factioServer.requestedExit;
             }
         }
