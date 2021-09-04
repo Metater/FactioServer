@@ -39,7 +39,7 @@ namespace FactioShared
     {
         // contains randomly gened scenario
         // contains roles
-        //public int ScenarioUIIndex { get; set; }
+        //public int ScenarioThemeIndex { get; set; }
         public string Scenario { get; set; }
         public short PlayerAScenarioIndex { get; set; }
         public short PlayerBScenarioIndex { get; set; }

@@ -10,23 +10,25 @@ namespace FactioServer
         public FactioServerListener listener;
         public NetManager server;
         public GameManager gameManager;
+        public ScenarioRegistry scenarioRegistry;
+
+        public bool requestedExit = false;
 
         public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
         public List<FactioPlayer> players = new List<FactioPlayer>();
-
-        // scenario registry
-        // and way of refreshing it with a command
 
         public Random rand = new Random();
 
         public FactioServer()
         {
-            gameManager = new GameManager(this);
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
             listener.server = server;
             server.Start(12733);
             Console.WriteLine("[Core] Server listening for connections on port 12733");
+
+            gameManager = new GameManager(this);
+            scenarioRegistry = new ScenarioRegistry();
         }
 
         public void Tick(long id)
@@ -54,6 +56,20 @@ namespace FactioServer
         public FactioPlayer GetPlayer(NetPeer peer)
         {
             return GetPlayer(peerClientIdMap.GetClientId(peer));
+        }
+
+        public void Command(string command)
+        {
+            switch (command)
+            {
+                case "exit":
+                    requestedExit = true;
+                    Console.WriteLine("[Core] Exiting.");
+                    break;
+                default:
+                    Console.WriteLine("[Core] Unknown command: " + command);
+                    break;
+            }
         }
     }
 }

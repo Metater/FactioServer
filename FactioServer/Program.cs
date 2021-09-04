@@ -27,7 +27,9 @@ namespace FactioServer
 
             long nextTickId = 0;
 
-            while (!Console.KeyAvailable)
+            string input = "";
+            bool running = true;
+            while (running)
             {
                 factioServer.server.PollEvents();
                 lastTick.Stop();
@@ -41,6 +43,19 @@ namespace FactioServer
                     nextTickId++;
                 }
                 Thread.Sleep(1);
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    char c = key.KeyChar;
+                    if (c == 13) // Is newline
+                    {
+                        factioServer.Command(input);
+                        input = "";
+                    }
+                    else
+                        input += c;
+                }
+                running = !factioServer.requestedExit;
             }
         }
     }

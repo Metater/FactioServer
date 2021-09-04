@@ -9,6 +9,8 @@ namespace FactioServer
         public List<FactioPlayer> players = new List<FactioPlayer>();
 
         public bool gameStarted = false;
+        // option to make game public later
+        // chat later
 
         public FactioGame(FactioPlayer leader)
         {
