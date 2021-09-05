@@ -26,7 +26,6 @@ namespace FactioServer
         {
             if (gameStarted) return false;
             if (players.Contains(player)) return false;
-            players.Add(player);
             if (players.Exists((p) => p.username == player.username))
             {
                 int number = 2;
@@ -38,6 +37,7 @@ namespace FactioServer
                 }
                 player.username = username;
             }
+            players.Add(player);
             return true;
         }
 

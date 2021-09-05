@@ -12,6 +12,11 @@ namespace FactioShared
         public string Username { get; set; }
         public int JoinCode { get; set; }
     }
+    public class ReadySPacket
+    {
+        // tell who is ready later
+        public bool Value { get; set; }
+    }
     public class ResponseSPacket
     {
         public string Response { get; set; }
@@ -59,5 +64,6 @@ namespace FactioShared
     public class ResultsStartCPacket
     {
         public short WinningPlayerIndex { get; set; }
+        // eventually ad everyone's score
     }
 }
