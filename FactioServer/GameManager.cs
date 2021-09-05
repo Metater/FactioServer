@@ -25,7 +25,7 @@ namespace FactioServer
             }
         }
 
-        public bool TryCreateLobby(FactioPlayer leader)
+        public bool TryCreateLobby(NetPeer peer, FactioPlayer leader)
         {
             if (leader.InGame) return false;
             int joinCode = -1;
@@ -39,12 +39,12 @@ namespace FactioServer
             FactioGame game = new FactioGame(leader);
             games.Add(joinCode, game);
             leader.game = game;
-            JoinedLobby(factioServer.peerClientIdMap.GetPeer(leader.clientId), joinCode);
+            JoinedLobby(peer, joinCode);
             UpdatePlayersInGame(game);
             return true;
         }
 
-        public bool TryJoinLobby(FactioPlayer player, int joinCode)
+        public bool TryJoinLobby(NetPeer peer, FactioPlayer player, int joinCode)
         {
             if (player.InGame) return false;
             if (games.TryGetValue(joinCode, out FactioGame game))
@@ -52,7 +52,7 @@ namespace FactioServer
                 if (game.TryJoinGame(player))
                 {
                     player.game = game;
-                    JoinedLobby(factioServer.peerClientIdMap.GetPeer(player.clientId), joinCode);
+                    JoinedLobby(peer, joinCode);
                     UpdatePlayersInGame(game);
                     return true;
                 }

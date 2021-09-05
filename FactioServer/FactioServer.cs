@@ -25,7 +25,6 @@ namespace FactioServer
         {
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
-            listener.server = server;
             server.Start(12733);
             Console.WriteLine("[Core] Server listening for connections on port 12733");
 

@@ -12,7 +12,6 @@ namespace FactioServer
     public class FactioServerListener : INetEventListener
     {
         private FactioServer factioServer;
-        public NetManager server;
 
         public NetPacketProcessor packetProcessor = new NetPacketProcessor();
 
@@ -21,6 +20,7 @@ namespace FactioServer
             this.factioServer = factioServer;
             packetProcessor.SubscribeReusable<CreateLobbySPacket, NetPeer>(OnCreateLobbySPacketReceived);
             packetProcessor.SubscribeReusable<JoinLobbySPacket, NetPeer>(OnJoinLobbySPacketReceived);
+            packetProcessor.SubscribeReusable<ReadySPacket, NetPeer>(OnReadySPacketReceived);
             packetProcessor.SubscribeReusable<ResponseSPacket, NetPeer>(OnResponseSPacketReceived);
             packetProcessor.SubscribeReusable<VoteSPacket, NetPeer>(OnVoteSPacketReceived);
         }
@@ -28,7 +28,7 @@ namespace FactioServer
         #region NetworkEvents
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            if (server.ConnectedPeersCount < 100)
+            if (factioServer.server.ConnectedPeersCount < 100)
                 request.AcceptIfKey("Factio");
             else
                 request.Reject();
@@ -68,7 +68,7 @@ namespace FactioServer
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
             player.username = packet.Username;
-            if (factioServer.gameManager.TryCreateLobby(player))
+            if (factioServer.gameManager.TryCreateLobby(peer, player))
             {
                 Console.WriteLine($"[Action (Created Lobby)] Client {player.clientId} named \"{player.username}\" made a lobby");
             }
@@ -77,10 +77,14 @@ namespace FactioServer
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
             player.username = packet.Username;
-            if (factioServer.gameManager.TryJoinLobby(player, packet.JoinCode))
+            if (factioServer.gameManager.TryJoinLobby(peer, player, packet.JoinCode))
             {
                 Console.WriteLine($"[Action (Joined Lobby)] Client {player.clientId} named \"{player.username}\" joined a lobby");
             }
+        }
+        private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
+        {
+
         }
         private void OnResponseSPacketReceived(ResponseSPacket packet, NetPeer peer)
         {
