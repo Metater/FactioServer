@@ -69,7 +69,9 @@ namespace FactioServer
                         input = "";
                     }
                     else if (c == 8) // Is backspace
-                        input = input.Remove(input.Length - 1);
+                    {
+                        if (input.Length > 0) input = input.Remove(input.Length - 1);
+                    }
                     else
                         input += c;
                 }

@@ -10,6 +10,7 @@ namespace FactioServer
         public string username = "";
         public bool InGame => game != null;
         public FactioGame game;
+        public bool ready = false;
 
         public FactioPlayer(int clientId)
         {

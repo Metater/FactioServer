@@ -36,7 +36,7 @@ namespace FactioServer
                 joinCode = factioServer.rand.Next(1000, 10000);
                 tries++;
             }
-            FactioGame game = new FactioGame(leader);
+            FactioGame game = new FactioGame(factioServer, leader);
             games.Add(joinCode, game);
             leader.game = game;
             JoinedLobby(peer, joinCode);

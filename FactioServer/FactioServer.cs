@@ -21,6 +21,8 @@ namespace FactioServer
 
         public Random rand = new Random();
 
+        public long lastTick = 0;
+
         public FactioServer()
         {
             listener = new FactioServerListener(this);
@@ -29,11 +31,12 @@ namespace FactioServer
             Console.WriteLine("[Core] Server listening for connections on port 12733");
 
             gameManager = new GameManager(this);
-            scenarioRegistry = new ScenarioRegistry();
+            scenarioRegistry = new ScenarioRegistry(this);
         }
 
         public void Tick(long id)
         {
+            lastTick = id;
             gameManager.Tick(id);
         }
 

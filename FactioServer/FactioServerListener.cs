@@ -28,7 +28,7 @@ namespace FactioServer
         #region NetworkEvents
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            if (factioServer.server.ConnectedPeersCount < 100)
+            if (factioServer.server.ConnectedPeersCount < 256)
                 request.AcceptIfKey("Factio");
             else
                 request.Reject();
@@ -84,15 +84,29 @@ namespace FactioServer
         }
         private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
         {
-
+            FactioPlayer player = factioServer.GetPlayer(peer);
+            player.ready = packet.Value;
+            if (packet.Value)
+                Console.WriteLine($"[Action (Ready)] Client {player.clientId} named \"{player.username}\" is ready");
+            else
+                Console.WriteLine($"[Action (Unready)] Client {player.clientId} named \"{player.username}\" is not ready");
+            player.game.ReadyUpdate();
         }
         private void OnResponseSPacketReceived(ResponseSPacket packet, NetPeer peer)
         {
-
+            FactioPlayer player = factioServer.GetPlayer(peer);
+            if (player.InGame)
+            {
+                player.game.GiveResponse(player, packet.Response);
+            }
         }
         private void OnVoteSPacketReceived(VoteSPacket packet, NetPeer peer)
         {
-
+            FactioPlayer player = factioServer.GetPlayer(peer);
+            if (player.InGame)
+            {
+                player.game.GiveVote(player, packet.VoteIsB);
+            }
         }
         #endregion ReceivedPacketImplementation
     }
