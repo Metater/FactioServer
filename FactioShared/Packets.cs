@@ -26,6 +26,11 @@ namespace FactioShared
         // the chosen option
         public bool VoteIsB { get; set; }
     }
+    public class ServerCommandSPacket
+    {
+        public string command;
+        public int password;
+    }
 
 
     // Could add a chat eventually
@@ -45,7 +50,7 @@ namespace FactioShared
         // contains randomly gened scenario
         // contains roles
         //public int ScenarioThemeIndex { get; set; }
-        public float RoundEndTime { get; set; }
+        public float ResponseTime { get; set; }
 
         public string Scenario { get; set; }
         public short PlayerAScenarioIndex { get; set; }
@@ -57,7 +62,7 @@ namespace FactioShared
     // Multiple groups of scenarios if more people later
     public class VotingStartCPacket
     {
-        public float VotingEndTime { get; set; }
+        public float VotingTime { get; set; }
         // Contains responses to scenario
         public string PlayerAResponse { get; set; }
         public string PlayerBResponse { get; set; }
@@ -66,7 +71,7 @@ namespace FactioShared
     // Send when everyone has voted
     public class ResultsStartCPacket
     {
-        public float ResultsEndTime { get; set; }
+        public float ResultsTime { get; set; }
         public short PlayerAVoteCount { get; set; }
         public short PlayerBVoteCount { get; set; }
         public short PlayerAIndex { get; set; }

@@ -38,7 +38,7 @@ namespace FactioServer
             }
             FactioGame game = new FactioGame(factioServer, leader);
             games.Add(joinCode, game);
-            leader.game = game;
+            leader.JoinGame(game);
             JoinedLobby(peer, joinCode);
             UpdatePlayersInGame(game);
             return true;
@@ -51,7 +51,7 @@ namespace FactioServer
             {
                 if (game.TryJoinGame(player))
                 {
-                    player.game = game;
+                    player.JoinGame(game);
                     JoinedLobby(peer, joinCode);
                     UpdatePlayersInGame(game);
                     return true;

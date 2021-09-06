@@ -36,7 +36,7 @@ namespace FactioServer
 
                 for (int i = 0; i < scenarios.Count; i++)
                 {
-                    if (factioServer.configRegistry.GetBoolConfig("debugging"))
+                    if (factioServer.IsDebugging)
                         Console.WriteLine($"[Debug] Scenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
                 }
             }

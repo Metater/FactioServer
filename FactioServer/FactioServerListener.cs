@@ -23,6 +23,7 @@ namespace FactioServer
             packetProcessor.SubscribeReusable<ReadySPacket, NetPeer>(OnReadySPacketReceived);
             packetProcessor.SubscribeReusable<ResponseSPacket, NetPeer>(OnResponseSPacketReceived);
             packetProcessor.SubscribeReusable<VoteSPacket, NetPeer>(OnVoteSPacketReceived);
+            packetProcessor.SubscribeReusable<ServerCommandSPacket, NetPeer>(OnServerCommandSPacketReceived);
         }
 
         #region NetworkEvents
@@ -85,27 +86,33 @@ namespace FactioServer
         private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
-            player.ready = packet.Value;
             if (packet.Value)
                 Console.WriteLine($"[Action (Ready)] Client {player.clientId} named \"{player.username}\" is ready");
             else
                 Console.WriteLine($"[Action (Unready)] Client {player.clientId} named \"{player.username}\" is not ready");
-            player.game.ReadyUpdate();
+            player.Ready(packet.Value);
         }
         private void OnResponseSPacketReceived(ResponseSPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
-            if (player.InGame)
-            {
-                player.game.GiveResponse(player, packet.Response);
-            }
+            player.Respond(packet.Response);
         }
         private void OnVoteSPacketReceived(VoteSPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
-            if (player.InGame)
+            player.Vote(packet.VoteIsB);
+        }
+        private void OnServerCommandSPacketReceived(ServerCommandSPacket packet, NetPeer peer)
+        {
+            FactioPlayer player = factioServer.GetPlayer(peer);
+            if (packet.password == factioServer.configRegistry.GetIntConfig("password"))
             {
-                player.game.GiveVote(player, packet.VoteIsB);
+                Console.WriteLine($"[Action (Client Command Execute)] Client with id {player.clientId}, named \"{player.username}\" is executing a command: {packet.command}");
+                factioServer.commandHandler.Handle(packet.command);
+            }
+            else
+            {
+                Console.WriteLine($"[Action (Client Command Execute)] Client with id {player.clientId}, named \"{player.username}\" attempted to execute a command: {packet.command}");
             }
         }
         #endregion ReceivedPacketImplementation

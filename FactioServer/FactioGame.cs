@@ -11,8 +11,7 @@ namespace FactioServer
         private FactioServer factioServer;
 
         public List<FactioPlayer> players = new List<FactioPlayer>();
-
-        public bool gameStarted = false;
+        public bool HasGameStarted { get; private set; } = false;
 
 
 
@@ -30,6 +29,8 @@ namespace FactioServer
         private string playerAResponse;
         private string playerBResponse;
 
+        private bool isPhaseInit = false;
+
         private List<(FactioPlayer, bool)> votes = new List<(FactioPlayer, bool)>();
 
         public FactioGame(FactioServer factioServer, FactioPlayer leader)
@@ -45,18 +46,46 @@ namespace FactioServer
                 case GamePhase.NotStarted:
                     break;
                 case GamePhase.Response:
-                    //if (phaseDepthSeconds > )
+                    if (!isPhaseInit)
+                    {
+                        isPhaseInit = true;
+                        if (factioServer.IsDebugging) Console.WriteLine($"[Debug] Response Start, led by \"{players[0].username}\"");
+                    }
+                    if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("responseTime"))
+                    {
+                        UpdatePhase(GamePhase.Voting);
+                    }
                     break;
                 case GamePhase.Voting:
+                    if (!isPhaseInit)
+                    {
+                        isPhaseInit = true;
+                        SendVotingStart();
+                        if (factioServer.IsDebugging) Console.WriteLine($"[Debug] Voting Start, led by \"{players[0].username}\"");
+                    }
+                    if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("votingTime"))
+                    {
+                        UpdatePhase(GamePhase.Results);
+                    }
                     break;
                 case GamePhase.Results:
+                    if (!isPhaseInit)
+                    {
+                        isPhaseInit = true;
+                        SendResultsStart();
+                        if (factioServer.IsDebugging) Console.WriteLine($"[Debug] Results Start, led by \"{players[0].username}\"");
+                    }
+                    if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("resultsTime"))
+                    {
+                        StartRound();
+                    }
                     break;
             }
         }
 
         public bool TryJoinGame(FactioPlayer player)
         {
-            if (gameStarted) return false;
+            if (HasGameStarted) return false;
             if (players.Contains(player)) return false;
             if (players.Exists((p) => p.username == player.username))
             {
@@ -85,20 +114,20 @@ namespace FactioServer
 
         public void ReadyUpdate()
         {
-            if (gameStarted) return;
+            if (HasGameStarted) return;
             if (players.Count < 2) return;
-            bool gameCanStart = true;
+            bool canStart = true;
             foreach (FactioPlayer player in players)
             {
-                if (!player.ready) gameCanStart = false;
+                if (!player.IsReady) canStart = false;
             }
-            if (gameCanStart) StartGame();
+            if (canStart) StartGame();
         }
 
         public void StartGame()
         {
             gameStartTick = factioServer.lastTick;
-            gameStarted = true;
+            HasGameStarted = true;
             Console.WriteLine($"[Action (Game Started)] Game started, led by \"{players[0].username}\"");
             StartRound();
         }
@@ -107,9 +136,10 @@ namespace FactioServer
         {
             // Reset round state
             UpdatePhase(GamePhase.NotStarted);
-            playerAResponse = "Did not respond";
-            playerBResponse = "Did not respond";
+            playerAResponse = "Did not respond.";
+            playerBResponse = "Did not respond.";
             votes.Clear();
+            players.ForEach((p) => p.NewRound());
 
             // Start next round
             roundStartTick = factioServer.lastTick;
@@ -120,13 +150,30 @@ namespace FactioServer
                 playerBIndex = GetRandomPlayerIndex();
             FactioPlayer playerA = players[playerAIndex];
             FactioPlayer playerB = players[playerBIndex];
-            SendRoundStart(playerA, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = playerAIndex, PlayerBIndex = playerBIndex });
-            SendRoundStart(playerB, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = playerAIndex, PlayerBIndex = playerBIndex });
+            float responseTime = factioServer.configRegistry.GetFloatConfig("responseTime");
+            RoundStartCPacket participantsRoundStart = new RoundStartCPacket
+            {
+                ResponseTime = responseTime,
+                Scenario = scenario.text,
+                PlayerAScenarioIndex = scenario.playerAIndex,
+                PlayerBScenarioIndex = scenario.playerBIndex,
+                PlayerAIndex = playerAIndex,
+                PlayerBIndex = playerBIndex
+            };
+            SendRoundStart(playerA, participantsRoundStart);
+            SendRoundStart(playerB, participantsRoundStart);
             foreach (FactioPlayer player in players)
             {
                 if (player == playerA || player == playerB)
                     continue;
-                SendRoundStart(player, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = -1, PlayerBIndex = -1 });
+                SendRoundStart(player, new RoundStartCPacket {
+                    ResponseTime = responseTime,
+                    Scenario = scenario.text,
+                    PlayerAScenarioIndex = scenario.playerAIndex,
+                    PlayerBScenarioIndex = scenario.playerBIndex,
+                    PlayerAIndex = -1,
+                    PlayerBIndex = -1
+                });
             }
             UpdatePhase(GamePhase.Response);
         }
@@ -139,6 +186,8 @@ namespace FactioServer
                 playerAResponse = response;
             else if (playerIndex == playerBIndex)
                 playerBResponse = response;
+            else return;
+            if (players[playerAIndex].HasResponded && players[playerBIndex].HasResponded) UpdatePhase(GamePhase.Voting);
         }
 
         public void GiveVote(FactioPlayer player, bool voteIsB)
@@ -146,12 +195,19 @@ namespace FactioServer
             if (gamePhase != GamePhase.Voting) return;
             votes.RemoveAll((playerVote) => playerVote.Item1 == player);
             votes.Add((player, voteIsB));
+            foreach (FactioPlayer p in players)
+            {
+                Console.WriteLine("[Debug] Voted: " + p.HasVoted);
+                if (!p.HasVoted) return;
+            }
+            UpdatePhase(GamePhase.Results);
         }
 
         private void UpdatePhase(GamePhase phase)
         {
             gamePhase = phase;
             phaseStartTick = factioServer.lastTick;
+            isPhaseInit = false;
         }
 
         private void SendRoundStart(FactioPlayer player, RoundStartCPacket roundStart)

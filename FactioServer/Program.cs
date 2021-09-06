@@ -44,7 +44,7 @@ namespace FactioServer
             long nextTickId = 0;
 
             string input = "";
-            while (!factioServer.requestedExit)
+            while (!factioServer.isExitRequested)
             {
                 factioServer.server.PollEvents();
                 lastTick.Stop();
@@ -54,7 +54,7 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    if (factioServer.debugTicks) Console.WriteLine("[Core] Tick: " + nextTickId);
+                    if (factioServer.isDebuggingTicks) Console.WriteLine("[Core] Tick: " + nextTickId);
                     nextTickId++;
                 }
                 if (Console.KeyAvailable)
@@ -74,7 +74,7 @@ namespace FactioServer
                     else
                         if (char.IsLetterOrDigit(c) || c == ' ') input += c;
                 }
-                Thread.Sleep(factioServer.pollPeriod);
+                Thread.Sleep(factioServer.PollPeriod);
             }
         }
     }

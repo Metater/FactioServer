@@ -25,7 +25,7 @@ namespace FactioServer
         }
 
         #region GetMethods
-        public float GetIntConfig(string configKey)
+        public int GetIntConfig(string configKey)
         {
             return intConfigs[configKey];
         }
@@ -92,10 +92,13 @@ namespace FactioServer
             else
             {
                 Console.WriteLine("[Core (Config Registry)] No configs found, creating and loading default file");
+                intConfigs.Add("pollPeriod", 1);
+                intConfigs.Add("password", 1024);
                 floatConfigs.Add("responseTime", 60);
                 floatConfigs.Add("votingTime", 30);
                 floatConfigs.Add("resultsTime", 15);
-                boolConfigs.Add("debugging", true);
+                boolConfigs.Add("isDebugging", true);
+                boolConfigs.Add("isDebuggingTicks", false);
                 SaveConfig();
             }
         }
@@ -154,7 +157,7 @@ namespace FactioServer
         public void ListConfigs()
         {
             string[] configs = File.ReadAllLines(configRegistryPath);
-            Console.WriteLine("[Core (Config Registry)] Listing configs: ");
+            Console.WriteLine("[Core (Config Registry)] Configs: ");
             for (int i = 0; i < configs.Length; i++)
             {
                 string config = configs[i];
@@ -178,11 +181,12 @@ namespace FactioServer
             boolConfigs.Add(configKey, value);
         }
 
-        private void RemoveConfig(string configKey)
+        public void RemoveConfig(string configKey, bool save = false)
         {
             intConfigs.Remove(configKey);
             floatConfigs.Remove(configKey);
             boolConfigs.Remove(configKey);
+            if (save) SaveConfig();
         }
 
         private string GetBoolString(bool value)

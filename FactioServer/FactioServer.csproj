@@ -13,4 +13,8 @@
     <ProjectReference Include="..\FactioShared\FactioShared.csproj" />
   </ItemGroup>
 
+  <Target Name="FileSync" AfterTargets="Publish">
+    <Exec Command="FileSync.exe \bin\Release\net5.0\publish\FactioServer" />
+  </Target>
+
 </Project>

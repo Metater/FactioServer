@@ -14,9 +14,11 @@ namespace FactioServer
         public ScenarioRegistry scenarioRegistry;
         public CommandHandler commandHandler;
 
-        public bool requestedExit = false;
-        public bool debugTicks = false;
-        public int pollPeriod = 1; // could add command for adjusting later
+        public bool isExitRequested = false;
+
+        public bool IsDebugging { get; private set; } = false;
+        public bool isDebuggingTicks = false;
+        public int PollPeriod { get; private set; } = 1; // could add command for adjusting later
 
         public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
         public List<FactioPlayer> players = new List<FactioPlayer>();
@@ -25,9 +27,13 @@ namespace FactioServer
 
         public long lastTick = 0;
 
+
+        // bools use is, has can
+
         public FactioServer()
         {
             configRegistry = new ConfigRegistry(this);
+            ReloadServerConfig();
 
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
@@ -37,6 +43,13 @@ namespace FactioServer
             gameManager = new GameManager(this);
             scenarioRegistry = new ScenarioRegistry(this);
             commandHandler = new CommandHandler(this);
+        }
+
+        public void ReloadServerConfig()
+        {
+            IsDebugging = configRegistry.GetBoolConfig("isDebugging");
+            isDebuggingTicks = configRegistry.GetBoolConfig("isDebuggingTicks");
+            PollPeriod = configRegistry.GetIntConfig("pollPeriod");
         }
 
         public void Tick(long id)
@@ -55,7 +68,7 @@ namespace FactioServer
 
         public void PeerDisconnected(NetPeer peer)
         {
-
+            // do important stuff
         }
 
         public FactioPlayer GetPlayer(int clientId)
