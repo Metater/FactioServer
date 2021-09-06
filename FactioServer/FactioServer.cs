@@ -7,14 +7,16 @@ namespace FactioServer
 {
     public class FactioServer : ITickable
     {
+        public ConfigRegistry configRegistry;
         public FactioServerListener listener;
         public NetManager server;
         public GameManager gameManager;
         public ScenarioRegistry scenarioRegistry;
+        public CommandHandler commandHandler;
 
         public bool requestedExit = false;
         public bool debugTicks = false;
-        public int pollRate = 1; // could add command for adjusting later
+        public int pollPeriod = 1; // could add command for adjusting later
 
         public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
         public List<FactioPlayer> players = new List<FactioPlayer>();
@@ -25,6 +27,8 @@ namespace FactioServer
 
         public FactioServer()
         {
+            configRegistry = new ConfigRegistry(this);
+
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
             server.Start(12733);
@@ -32,6 +36,7 @@ namespace FactioServer
 
             gameManager = new GameManager(this);
             scenarioRegistry = new ScenarioRegistry(this);
+            commandHandler = new CommandHandler(this);
         }
 
         public void Tick(long id)
@@ -60,36 +65,6 @@ namespace FactioServer
         public FactioPlayer GetPlayer(NetPeer peer)
         {
             return GetPlayer(peerClientIdMap.GetClientId(peer));
-        }
-
-        public void Command(string command)
-        {
-            switch (command)
-            {
-                case "exit":
-                    requestedExit = true;
-                    Console.WriteLine("[Core] Exiting.");
-                    break;
-                case "help":
-                    Console.WriteLine("[Core] Commands: ");
-                    Console.WriteLine("\texit: Closes the server");
-                    Console.WriteLine("\tdebug ticks: Toggles tick debugging");
-                    Console.WriteLine("\tclear: Clears console");
-                    break;
-                case "debug ticks":
-                    debugTicks = !debugTicks;
-                    if (debugTicks)
-                        Console.WriteLine("[Core] Tick debugging enabled.");
-                    else
-                        Console.WriteLine("[Core] Tick debugging disabled.");
-                    break;
-                case "clear":
-                    Console.Clear();
-                    break;
-                default:
-                    Console.WriteLine("[Core] Unknown command: " + command);
-                    break;
-            }
         }
     }
 }

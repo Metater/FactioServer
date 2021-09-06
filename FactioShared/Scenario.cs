@@ -34,11 +34,5 @@ namespace FactioShared
             short playerBIndex = short.Parse(indicies[1]);
             return new Scenario(text, playerAIndex, playerBIndex);
         }
-
-        public void Print()
-        {
-            Console.WriteLine($"[Debug] Scenario text: {text}");
-            Console.WriteLine($"[Debug] Player A index: {playerAIndex}, Player B index: {playerBIndex}");
-        }
     }
 }

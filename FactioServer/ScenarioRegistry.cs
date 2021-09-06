@@ -10,9 +10,7 @@ namespace FactioServer
     {
         private FactioServer factioServer;
 
-        // scenario registry
-        // and way of refreshing it with a command
-        private string scenarioRegistryPath => Directory.GetCurrentDirectory() + "/" + "scenarios.reg";
+        private string scenarioRegistryPath => $"{Directory.GetCurrentDirectory()}/scenarios.reg";
 
         private List<Scenario> scenarios = new List<Scenario>();
 
@@ -31,16 +29,20 @@ namespace FactioServer
         {
             if (File.Exists(scenarioRegistryPath))
             {
-                Console.WriteLine("[Core] Loading the scenario registry");
+                Console.WriteLine("[Core (Scenario Registry)] Loading the scenario registry");
                 string[] unloadedScenarios = File.ReadAllLines(scenarioRegistryPath);
                 foreach (string unloadedScenario in unloadedScenarios)
                     scenarios.Add(Scenario.LoadScenario(unloadedScenario));
 
-                scenarios.ForEach((scenario) => { scenario.Print(); Console.WriteLine($"[Debug] {scenario.Compile("Billy the 5th", "Octavius the 0th")}"); });
+                for (int i = 0; i < scenarios.Count; i++)
+                {
+                    if (factioServer.configRegistry.GetBoolConfig("debugging"))
+                        Console.WriteLine($"[Debug] Scenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
+                }
             }
             else
             {
-                Console.WriteLine("[Core] No scenarios found, creating empty file");
+                Console.WriteLine("[Core (Scenario Registry)] No scenarios found, creating empty file");
                 File.WriteAllText(scenarioRegistryPath, "");
             }
         }

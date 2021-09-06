@@ -13,20 +13,22 @@ namespace FactioServer
         public List<FactioPlayer> players = new List<FactioPlayer>();
 
         public bool gameStarted = false;
-        public bool roundResponse = false;
-        public bool roundVoting = false;
-        public bool roundResults = false;
-        // option to make game public later
-        // chat later
 
 
+
+        private GamePhase gamePhase = GamePhase.NotStarted;
 
         private long gameStartTick;
+        private float gameDepthSeconds => (float)((factioServer.lastTick - gameStartTick) / Program.TPS);
         private long roundStartTick;
-        private short playerAIndex = -1;
-        private short playerBIndex = -1;
-        private string playerAResponse = "Did not respond";
-        private string playerBResponse = "Did not respond";
+        private float roundDepthSeconds => (float)((factioServer.lastTick - roundStartTick) / Program.TPS);
+        private long phaseStartTick;
+        private float phaseDepthSeconds => (float)((factioServer.lastTick - phaseStartTick) / Program.TPS);
+
+        private short playerAIndex;
+        private short playerBIndex;
+        private string playerAResponse;
+        private string playerBResponse;
 
         private List<(FactioPlayer, bool)> votes = new List<(FactioPlayer, bool)>();
 
@@ -38,37 +40,16 @@ namespace FactioServer
 
         public void Tick(long id)
         {
-            if (!gameStarted) return;
-            int roundDepthSeconds = (int)((factioServer.lastTick - roundStartTick) * Program.TPS);
-            switch (roundDepthSeconds)
+            switch (gamePhase)
             {
-                case < 60: // Response 60
-                    if (!roundResponse)
-                    {
-                        roundResponse = true;
-                    }
-                    Console.WriteLine("[Debug] Response");
+                case GamePhase.NotStarted:
                     break;
-                case < 90: // Voting 90
-                    if (!roundVoting)
-                    {
-                        roundVoting = true;
-                        SendVotingStart();
-                    }
-                    Console.WriteLine("[Debug] Voting");
+                case GamePhase.Response:
+                    //if (phaseDepthSeconds > )
                     break;
-                case < 105: // Results 105
-                    if (!roundResults)
-                    {
-                        roundResults = true;
-                        SendResultsStart();
-                    }
-                    Console.WriteLine("[Debug] Results");
+                case GamePhase.Voting:
                     break;
-                default:
-                    // End round
-                    // Start new round
-                    StartRound();
+                case GamePhase.Results:
                     break;
             }
         }
@@ -124,25 +105,21 @@ namespace FactioServer
 
         public void StartRound()
         {
-            roundResponse = false;
-            roundVoting = false;
-            roundResults = false;
+            // Reset round state
+            UpdatePhase(GamePhase.NotStarted);
             playerAResponse = "Did not respond";
             playerBResponse = "Did not respond";
             votes.Clear();
 
+            // Start next round
             roundStartTick = factioServer.lastTick;
+            Scenario scenario = factioServer.scenarioRegistry.GetRandomScenario();
             playerAIndex = GetRandomPlayerIndex();
-            FactioPlayer playerA;
-            FactioPlayer playerB;
-            playerA = players[playerAIndex];
             playerBIndex = GetRandomPlayerIndex();
             while (playerAIndex == playerBIndex)
-            {
                 playerBIndex = GetRandomPlayerIndex();
-            }
-            playerB = players[playerBIndex];
-            Scenario scenario = factioServer.scenarioRegistry.GetRandomScenario();
+            FactioPlayer playerA = players[playerAIndex];
+            FactioPlayer playerB = players[playerBIndex];
             SendRoundStart(playerA, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = playerAIndex, PlayerBIndex = playerBIndex });
             SendRoundStart(playerB, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = playerAIndex, PlayerBIndex = playerBIndex });
             foreach (FactioPlayer player in players)
@@ -151,11 +128,12 @@ namespace FactioServer
                     continue;
                 SendRoundStart(player, new RoundStartCPacket { Scenario = scenario.text, PlayerAScenarioIndex = scenario.playerAIndex, PlayerBScenarioIndex = scenario.playerBIndex, PlayerAIndex = -1, PlayerBIndex = -1 });
             }
+            UpdatePhase(GamePhase.Response);
         }
 
         public void GiveResponse(FactioPlayer player, string response)
         {
-            if (!gameStarted || !roundResponse) return;
+            if (gamePhase != GamePhase.Response) return;
             short playerIndex = (short)players.IndexOf(player);
             if (playerIndex == playerAIndex)
                 playerAResponse = response;
@@ -165,10 +143,15 @@ namespace FactioServer
 
         public void GiveVote(FactioPlayer player, bool voteIsB)
         {
-            if (!gameStarted || !roundVoting) return;
-            foreach ((FactioPlayer, bool) vote in votes)
-                if (vote.Item1 == player) return;
+            if (gamePhase != GamePhase.Voting) return;
+            votes.RemoveAll((playerVote) => playerVote.Item1 == player);
             votes.Add((player, voteIsB));
+        }
+
+        private void UpdatePhase(GamePhase phase)
+        {
+            gamePhase = phase;
+            phaseStartTick = factioServer.lastTick;
         }
 
         private void SendRoundStart(FactioPlayer player, RoundStartCPacket roundStart)
@@ -207,5 +190,13 @@ namespace FactioServer
         }
 
         private short GetRandomPlayerIndex() { return (short)factioServer.rand.Next(0, players.Count); }
+    }
+
+    public enum GamePhase
+    {
+        NotStarted,
+        Response,
+        Voting,
+        Results
     }
 }

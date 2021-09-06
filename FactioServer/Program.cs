@@ -7,7 +7,7 @@ namespace FactioServer
 {
     class Program
     {
-        public const double TPS = 1;
+        public const double TPS = 20;
 
         static void Main(string[] args)
         {
@@ -44,8 +44,7 @@ namespace FactioServer
             long nextTickId = 0;
 
             string input = "";
-            bool running = true;
-            while (running)
+            while (!factioServer.requestedExit)
             {
                 factioServer.server.PollEvents();
                 lastTick.Stop();
@@ -64,7 +63,7 @@ namespace FactioServer
                     char c = key.KeyChar;
                     if (c == 13) // Is newline
                     {
-                        if (input != "") factioServer.Command(input);
+                        if (input != "") factioServer.commandHandler.Handle(input);
                         else Console.WriteLine();
                         input = "";
                     }
@@ -73,10 +72,9 @@ namespace FactioServer
                         if (input.Length > 0) input = input.Remove(input.Length - 1);
                     }
                     else
-                        input += c;
+                        if (char.IsLetterOrDigit(c) || c == ' ') input += c;
                 }
-                Thread.Sleep(factioServer.pollRate);
-                running = !factioServer.requestedExit;
+                Thread.Sleep(factioServer.pollPeriod);
             }
         }
     }
