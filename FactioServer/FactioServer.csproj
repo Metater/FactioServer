@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <Target Name="FileSync" AfterTargets="Publish">
-    <Exec Command="FileSync.exe \bin\Release\net5.0\publish\FactioServer" />
+	<Exec Command="FileSync.exe \bin\Release\net5.0\publish\FactioServer 192.168.1.84 1744" />
   </Target>
 
 </Project>

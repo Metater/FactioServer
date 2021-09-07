@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -56,6 +57,11 @@ namespace FactioServer
                     factioServer.Tick(nextTickId);
                     if (factioServer.isDebuggingTicks) Console.WriteLine("[Core] Tick: " + nextTickId);
                     nextTickId++;
+                    if (File.Exists($"{Directory.GetCurrentDirectory()}/quit.req"))
+                    {
+                        factioServer.commandHandler.Handle("exit");
+                        File.Delete($"{Directory.GetCurrentDirectory()}/quit.req");
+                    }
                 }
                 if (Console.KeyAvailable)
                 {
