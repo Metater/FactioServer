@@ -12,6 +12,10 @@ namespace FactioShared
         public string Username { get; set; }
         public int JoinCode { get; set; }
     }
+    public class LeaveLobbySPacket
+    {
+
+    }
     public class ReadySPacket
     {
         // tell who is ready later
@@ -77,5 +81,11 @@ namespace FactioShared
         public short PlayerAIndex { get; set; }
         public short PlayerBIndex { get; set; }
         // eventually ad everyone's score
+    }
+    public class GameEndPacket
+    { 
+        public string Reason { get; set; }
+        // Server shutdown
+        // Leader left
     }
 }

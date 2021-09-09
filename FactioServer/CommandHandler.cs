@@ -18,12 +18,12 @@ namespace FactioServer
         public void Handle(string command)
         {
             string[] commandSplit = command.Split(' ');
+            if (commandSplit.Length < 1) return;
             switch (commandSplit[0])
             {
                 case "help":
                     Console.WriteLine("[Core] Commands: ");
                     Console.WriteLine("\texit");
-                    Console.WriteLine("\tdebug ticks");
                     Console.WriteLine("\tclear");
                     Console.WriteLine("\treload scenarios");
                     Console.WriteLine("\treload config");
@@ -36,25 +36,11 @@ namespace FactioServer
                     factioServer.isExitRequested = true;
                     Console.WriteLine("[Core] Exiting");
                     break;
-                case "debug":
-                    switch (commandSplit[1])
-                    {
-                        case "ticks":
-                            factioServer.isDebuggingTicks = !factioServer.isDebuggingTicks;
-                            if (factioServer.isDebuggingTicks)
-                                Console.WriteLine("[Core] Tick debugging enabled");
-                            else
-                                Console.WriteLine("[Core] Tick debugging disabled");
-                            break;
-                        default:
-                            SubcommandError(command);
-                            break;
-                    }
-                    break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "reload":
+                    if (TermCountError(command, 2)) return;
                     switch (commandSplit[1])
                     {
                         case "scenarios":
@@ -69,31 +55,25 @@ namespace FactioServer
                             break;
                     }
                     break;
-                default:
-                    Console.WriteLine($"[Core] Unknown command: {command}");
-                    break;
                 case "config":
                     switch (commandSplit[1])
                     {
                         case "get":
-                            if (commandSplit.Length != 3)
-                                TermCountError(command, 3);
+                            if (TermCountError(command, 3)) return;
                             if (factioServer.configRegistry.TryGetConfigValueString(commandSplit[2], out string value))
                                 Console.WriteLine($"[Core] Config \"{commandSplit[2]}\" value: {value}");
                             else
                                 Console.WriteLine($"[Core] Unknown config \"{commandSplit[2]}\"");
                             break;
                         case "set":
-                            if (commandSplit.Length != 4)
-                                TermCountError(command, 4);
+                            if (TermCountError(command, 4)) return;
                             if (factioServer.configRegistry.ParseConfig(commandSplit[2], commandSplit[3]))
                                 Console.WriteLine($"[Core] Config \"{commandSplit[2]}\" updated with value: {commandSplit[3]}");
                             else
                                 Console.WriteLine($"[Core] Could not parse config and value");
                             break;
                         case "del":
-                            if (commandSplit.Length != 3)
-                                TermCountError(command, 3);
+                            if (TermCountError(command, 3)) return;
                             Console.WriteLine($"[Core] Deleting config \"{commandSplit[2]}\"");
                             factioServer.configRegistry.RemoveConfig(commandSplit[2], true);
                             break;
@@ -105,6 +85,9 @@ namespace FactioServer
                             break;
                     }
                     break;
+                default:
+                    Console.WriteLine($"[Core] Unknown command: {command}");
+                    break;
             }
         }
 
@@ -115,9 +98,15 @@ namespace FactioServer
             Handle("help");
         }
 
-        private void TermCountError(string command, int expectedTermCount)
+        private bool TermCountError(string command, int expectedTermCount)
         {
-            Console.WriteLine($"[Core] Expected {expectedTermCount} terms in command: {command}");
+            string[] commandSplit = command.Split(' ');
+            if (commandSplit.Length != expectedTermCount)
+            {
+                Console.WriteLine($"[Core] Expected {expectedTermCount} terms in command: {command}");
+                return true;
+            }
+            return false;
         }
     }
 }

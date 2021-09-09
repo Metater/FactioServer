@@ -25,6 +25,11 @@ namespace FactioServer
         {
             Game = game;
         }
+        public void LeaveGame()
+        {
+            if (InGame)
+                Game.LeaveGame();
+        }
 
         public void Ready(bool value)
         {

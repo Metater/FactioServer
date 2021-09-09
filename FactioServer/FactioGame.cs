@@ -83,6 +83,11 @@ namespace FactioServer
             }
         }
 
+        public void LeaveGame()
+        {
+
+        }
+
         public bool TryJoinGame(FactioPlayer player)
         {
             if (HasGameStarted) return false;

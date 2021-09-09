@@ -45,6 +45,7 @@ namespace FactioServer
             long nextTickId = 0;
 
             string input = "";
+            int lastChar = -1;
             while (!factioServer.isExitRequested)
             {
                 factioServer.server.PollEvents();
@@ -67,18 +68,25 @@ namespace FactioServer
                 {
                     ConsoleKeyInfo key = Console.ReadKey();
                     char c = key.KeyChar;
+                    //Console.WriteLine((int)c);
                     if (c == 13) // Is newline
                     {
                         if (input != "") factioServer.commandHandler.Handle(input);
                         else Console.WriteLine();
                         input = "";
                     }
-                    else if (c == 8) // Is backspace
+                    else if (c == 8 || c == 127) // Is backspace
                     {
-                        if (input.Length > 0) input = input.Remove(input.Length - 1);
+                        if (input.Length > 0)
+                        {
+                            input = input.Remove(input.Length - 1);
+                            if (lastChar != 8 && lastChar != 127) Console.WriteLine();
+                            Console.WriteLine(input);
+                        }
                     }
                     else
                         if (char.IsLetterOrDigit(c) || c == ' ') input += c;
+                    lastChar = c;
                 }
                 Thread.Sleep(factioServer.PollPeriod);
             }
