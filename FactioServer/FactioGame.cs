@@ -202,7 +202,7 @@ namespace FactioServer
             votes.Add((player, voteIsB));
             foreach (FactioPlayer p in players)
             {
-                Console.WriteLine("[Debug] Voted: " + p.HasVoted);
+                if (factioServer.IsDebugging) Console.WriteLine("[Debug] Voted: " + p.HasVoted);
                 if (!p.HasVoted) return;
             }
             UpdatePhase(GamePhase.Results);
