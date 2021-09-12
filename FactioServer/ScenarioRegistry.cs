@@ -25,26 +25,61 @@ namespace FactioServer
             return scenarios[factioServer.rand.Next(0, scenarios.Count)];
         }
 
+        public bool DeleteScenario(int id)
+        {
+            if (scenarios.Count <= id) return false;
+            scenarios.RemoveAt(id);
+            RefreshIds();
+            SaveScenarios();
+            return true;
+        }
+
+        public bool ReplaceScenario(int id, string unloadedScenario)
+        {
+            if (scenarios.Count <= id) return false;
+            scenarios[id].text = unloadedScenario;
+            SaveScenarios();
+            return true;
+        }
+
         public void LoadScenarios()
         {
             if (File.Exists(scenarioRegistryPath))
             {
-                Console.WriteLine("[Core (Scenario Registry)] Loading the scenario registry");
+                factioServer.commandHandler.OutputLine("[Scenario Registry] Loading the scenario registry");
                 string[] unloadedScenarios = File.ReadAllLines(scenarioRegistryPath);
-                foreach (string unloadedScenario in unloadedScenarios)
-                    scenarios.Add(Scenario.LoadScenario(unloadedScenario));
+
+                for (int i = 0; i < unloadedScenarios.Length; i++)
+                {
+                    scenarios.Add(Scenario.Load(i, unloadedScenarios[i]));
+                }
 
                 for (int i = 0; i < scenarios.Count; i++)
                 {
                     if (factioServer.IsDebugging)
-                        Console.WriteLine($"[Debug] Scenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
+                        factioServer.commandHandler.OutputLine($"[Scenario Registry] [Debug] Scenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
                 }
+
+                factioServer.commandHandler.OutputLine("[Scenario Registry] Finished loading the scenario registry");
             }
             else
             {
-                Console.WriteLine("[Core (Scenario Registry)] No scenarios found, creating empty file");
+                factioServer.commandHandler.OutputLine("[Scenario Registry] No scenarios found, creating empty file");
                 File.WriteAllText(scenarioRegistryPath, "");
             }
+        }
+
+        private void SaveScenarios()
+        {
+            List<string> unloadedScenarios = new List<string>();
+            foreach (Scenario scenario in scenarios) unloadedScenarios.Add($"\"{scenario.text}\"");
+            File.WriteAllLines(scenarioRegistryPath, unloadedScenarios.ToArray());
+        }
+
+        private void RefreshIds()
+        {
+            for (int i = 0; i < scenarios.Count; i++)
+                scenarios[i].id = i;
         }
     }
 }

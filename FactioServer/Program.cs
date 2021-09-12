@@ -12,31 +12,31 @@ namespace FactioServer
 
         static void Main(string[] args)
         {
-            Console.WriteLine("[Core] Hello World!");
-            Console.WriteLine("[Core] Factio Server v0.2");
-            Console.WriteLine("[Core] Starting server...");
+            Console.WriteLine("[Factio Server] Hello World!");
+            Console.WriteLine("[Factio Server] Factio Server v0.2");
+            Console.WriteLine("[Factio Server] Starting server...");
 
             long SystemTPS;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SystemTPS = 10000000;
-                Console.WriteLine("[Core] Oooooo, Windows!");
+                Console.WriteLine("[Factio Server] Oooooo, Windows!");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 SystemTPS = 1000000000;
-                Console.WriteLine("[Core] Oooooo, Linux!");
+                Console.WriteLine("[Factio Server] Oooooo, Linux!");
             }
             else
             {
-                Console.WriteLine("[Core] Unsupported OS detected! Stopping!");
+                Console.WriteLine("[Factio Server] Unsupported OS detected! Stopping!");
                 return;
             }
             long TimePerTick = (long)(SystemTPS / TPS);
 
             FactioServer factioServer = new FactioServer();
 
-            Console.WriteLine("[Core] Started polling for incoming data");
+            Console.WriteLine("[Factio Server] Started polling for incoming data");
 
             var lastTick = new Stopwatch();
             lastTick.Start();
@@ -56,7 +56,7 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    if (factioServer.isDebuggingTicks) Console.WriteLine("[Core] Tick: " + nextTickId);
+                    if (factioServer.isDebuggingTicks) Console.WriteLine("[Factio Server] [Debug] Tick: " + nextTickId);
                     nextTickId++;
                     if (File.Exists($"{Directory.GetCurrentDirectory()}/quit.req"))
                     {
@@ -68,7 +68,6 @@ namespace FactioServer
                 {
                     ConsoleKeyInfo key = Console.ReadKey();
                     char c = key.KeyChar;
-                    //Console.WriteLine((int)c);
                     if (c == 13) // Is newline
                     {
                         if (input != "") factioServer.commandHandler.Handle(input);
@@ -90,6 +89,7 @@ namespace FactioServer
                 }
                 Thread.Sleep(factioServer.PollPeriod);
             }
+            factioServer.commandHandler.OutputLine("[Factio Server] Exiting");
         }
     }
 }

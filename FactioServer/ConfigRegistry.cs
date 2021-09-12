@@ -78,7 +78,7 @@ namespace FactioServer
             boolConfigs.Clear();
             if (File.Exists(configRegistryPath))
             {
-                Console.WriteLine("[Core (Config Registry)] Loading the config registry");
+                factioServer.commandHandler.OutputLine("[Config Registry] Loading the config registry");
                 string[] configs = File.ReadAllLines(configRegistryPath);
                 for (int i = 0; i < configs.Length; i++)
                 {
@@ -86,12 +86,12 @@ namespace FactioServer
                     string[] configPair = config.Split(' ');
                     if (configPair.Length == 2)
                         if (ParseConfig(configPair[0], configPair[1])) continue;
-                    Console.WriteLine($"[Core (Config Registry)] Could not parse config line index {i}: {config}");
+                    factioServer.commandHandler.OutputLine($"[Config Registry] Could not parse config line index {i}: {config}");
                 }
             }
             else
             {
-                Console.WriteLine("[Core (Config Registry)] No configs found, creating and loading default file");
+                factioServer.commandHandler.OutputLine("[Config Registry] No configs found, creating and loading default file");
                 intConfigs.Add("pollPeriod", 1);
                 intConfigs.Add("password", 1024);
                 floatConfigs.Add("responseTime", 60);
@@ -157,11 +157,11 @@ namespace FactioServer
         public void ListConfigs()
         {
             string[] configs = File.ReadAllLines(configRegistryPath);
-            Console.WriteLine("[Core (Config Registry)] Configs: ");
+            factioServer.commandHandler.OutputLine("[Config Registry] Configs: ");
             for (int i = 0; i < configs.Length; i++)
             {
                 string config = configs[i];
-                Console.WriteLine($"\t{i}: {config}");
+                factioServer.commandHandler.OutputLine($"\t{i}: {config}");
             }
         }
 

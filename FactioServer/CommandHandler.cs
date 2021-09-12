@@ -10,45 +10,59 @@ namespace FactioServer
     {
         private FactioServer factioServer;
 
+        private bool currentlyExecuting = false;
+        private string output = "";
+        private bool redirectingOutput = false;
+
         public CommandHandler(FactioServer factioServer)
         {
             this.factioServer = factioServer;
         }
 
-        public void Handle(string command)
+        public string Handle(string command, bool redirectOutput = false)
         {
+            currentlyExecuting = true;
+            output = "";
+            redirectingOutput = redirectOutput;
+
             string[] commandSplit = command.Split(' ');
-            if (commandSplit.Length < 1) return;
+            if (commandSplit.Length < 1)
+            {
+                OutputLine("[Command Handler] Can't parse whitespace");
+                return CommandReturn();
+            }
             switch (commandSplit[0])
             {
                 case "help":
-                    Console.WriteLine("[Core] Commands: ");
-                    Console.WriteLine("\texit");
-                    Console.WriteLine("\tclear");
-                    Console.WriteLine("\treload scenarios");
-                    Console.WriteLine("\treload config");
-                    Console.WriteLine("\tconfig get configName");
-                    Console.WriteLine("\tconfig set configName configValue");
-                    Console.WriteLine("\tconfig del configName");
-                    Console.WriteLine("\tconfig list");
+                    OutputLine("[Command Handler] Commands: ");
+
+                    OutputLine("\texit");
+                    OutputLine("\tclear");
+
+                    OutputLine("\treload scenarios");
+                    OutputLine("\treload config");
+
+                    OutputLine("\tconfig get configName");
+                    OutputLine("\tconfig set configName configValue");
+                    OutputLine("\tconfig del configName");
+                    OutputLine("\tconfig list");
                     break;
                 case "exit":
                     factioServer.isExitRequested = true;
-                    Console.WriteLine("[Core] Exiting");
                     break;
                 case "clear":
-                    Console.Clear();
+                    if (!redirectingOutput) Console.Clear();
                     break;
                 case "reload":
-                    if (TermCountError(command, 2)) return;
+                    if (TermCountError(command, 2)) return CommandReturn();
                     switch (commandSplit[1])
                     {
                         case "scenarios":
                             factioServer.scenarioRegistry.LoadScenarios();
                             break;
                         case "config":
-                            Console.WriteLine($"[Core] Reloading server config");
-                            factioServer.ReloadServerConfig();
+                            factioServer.configRegistry.LoadConfig();
+                            factioServer.LoadServerConfig();
                             break;
                         default:
                             SubcommandError(command);
@@ -59,22 +73,22 @@ namespace FactioServer
                     switch (commandSplit[1])
                     {
                         case "get":
-                            if (TermCountError(command, 3)) return;
+                            if (TermCountError(command, 3)) return CommandReturn();
                             if (factioServer.configRegistry.TryGetConfigValueString(commandSplit[2], out string value))
-                                Console.WriteLine($"[Core] Config \"{commandSplit[2]}\" value: {value}");
+                                OutputLine($"[Core] Config \"{commandSplit[2]}\" value: {value}");
                             else
-                                Console.WriteLine($"[Core] Unknown config \"{commandSplit[2]}\"");
+                                OutputLine($"[Core] Unknown config \"{commandSplit[2]}\"");
                             break;
                         case "set":
-                            if (TermCountError(command, 4)) return;
+                            if (TermCountError(command, 4)) return CommandReturn();
                             if (factioServer.configRegistry.ParseConfig(commandSplit[2], commandSplit[3]))
-                                Console.WriteLine($"[Core] Config \"{commandSplit[2]}\" updated with value: {commandSplit[3]}");
+                                OutputLine($"[Core] Config \"{commandSplit[2]}\" updated with value: {commandSplit[3]}");
                             else
-                                Console.WriteLine($"[Core] Could not parse config and value");
+                                OutputLine($"[Core] Could not parse config and value");
                             break;
                         case "del":
-                            if (TermCountError(command, 3)) return;
-                            Console.WriteLine($"[Core] Deleting config \"{commandSplit[2]}\"");
+                            if (TermCountError(command, 3)) return CommandReturn();
+                            OutputLine($"[Core] Deleting config \"{commandSplit[2]}\"");
                             factioServer.configRegistry.RemoveConfig(commandSplit[2], true);
                             break;
                         case "list":
@@ -86,16 +100,35 @@ namespace FactioServer
                     }
                     break;
                 default:
-                    Console.WriteLine($"[Core] Unknown command: {command}");
+                    OutputLine($"[Command Handler] Unknown command: {command}");
                     break;
             }
+            return CommandReturn();
+        }
+
+        public void Output(string text)
+        {
+            if (!redirectingOutput)
+                Console.WriteLine(output);
+            if (currentlyExecuting)
+                output += text;
+        }
+        public void OutputLine(string text)
+        {
+            Output(text + "\n");
+        }
+
+        private string CommandReturn()
+        {
+            currentlyExecuting = false;
+            redirectingOutput = false;
+            return output;
         }
 
         private void SubcommandError(string command)
         {
             string[] commandSplit = command.Split(' ');
-            Console.WriteLine($"[Core] Unknown subcommand of {commandSplit[1]}: {command}");
-            Handle("help");
+            OutputLine($"[Command Handler] Unknown subcommand of {commandSplit[1]}: {command}");
         }
 
         private bool TermCountError(string command, int expectedTermCount)
@@ -103,7 +136,7 @@ namespace FactioServer
             string[] commandSplit = command.Split(' ');
             if (commandSplit.Length != expectedTermCount)
             {
-                Console.WriteLine($"[Core] Expected {expectedTermCount} terms in command: {command}");
+                OutputLine($"[Command Handler] Expected {expectedTermCount} terms in command: {command}");
                 return true;
             }
             return false;

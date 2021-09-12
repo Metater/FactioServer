@@ -32,21 +32,22 @@ namespace FactioServer
 
         public FactioServer()
         {
+            commandHandler = new CommandHandler(this);
             configRegistry = new ConfigRegistry(this);
-            ReloadServerConfig();
+            LoadServerConfig();
 
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
             server.Start(12733);
-            Console.WriteLine("[Core] Server listening for connections on port 12733");
+            Console.WriteLine("[Factio Server] Server listening for connections on port 12733");
 
             gameManager = new GameManager(this);
             scenarioRegistry = new ScenarioRegistry(this);
-            commandHandler = new CommandHandler(this);
         }
 
-        public void ReloadServerConfig()
+        public void LoadServerConfig()
         {
+            commandHandler.OutputLine($"[Factio Server] Reloading server config");
             IsDebugging = configRegistry.GetBoolConfig("isDebugging");
             isDebuggingTicks = configRegistry.GetBoolConfig("isDebuggingTicks");
             PollPeriod = configRegistry.GetIntConfig("pollPeriod");

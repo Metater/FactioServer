@@ -55,10 +55,7 @@ namespace FactioShared
         // contains roles
         //public int ScenarioThemeIndex { get; set; }
         public float ResponseTime { get; set; }
-
         public string Scenario { get; set; }
-        public short PlayerAScenarioIndex { get; set; }
-        public short PlayerBScenarioIndex { get; set; }
         public short PlayerAIndex { get; set; } // -1 if your not participating
         public short PlayerBIndex { get; set; } // -1 if your not participating
     }
@@ -82,10 +79,14 @@ namespace FactioShared
         public short PlayerBIndex { get; set; }
         // eventually ad everyone's score
     }
-    public class GameEndPacket
+    public class GameEndCPacket
     { 
         public string Reason { get; set; }
         // Server shutdown
         // Leader left
+    }
+    public class ServerMessageCPacket
+    {
+        public string Message { get; set; }
     }
 }
