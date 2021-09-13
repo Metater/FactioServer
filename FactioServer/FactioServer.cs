@@ -47,7 +47,7 @@ namespace FactioServer
 
         public void LoadServerConfig()
         {
-            commandHandler.OutputLine($"[Factio Server] Reloading server config");
+            commandHandler.OutputLine("[Factio Server] Reloading server config");
             IsDebugging = configRegistry.GetBoolConfig("isDebugging");
             isDebuggingTicks = configRegistry.GetBoolConfig("isDebuggingTicks");
             PollPeriod = configRegistry.GetIntConfig("pollPeriod");

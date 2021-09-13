@@ -88,17 +88,13 @@ namespace FactioServer
                         if (ParseConfig(configPair[0], configPair[1])) continue;
                     factioServer.commandHandler.OutputLine($"[Config Registry] Could not parse config line index {i}: {config}");
                 }
+                EnsureDefaultConfigs();
+                SaveConfig();
             }
             else
             {
                 factioServer.commandHandler.OutputLine("[Config Registry] No configs found, creating and loading default file");
-                intConfigs.Add("pollPeriod", 1);
-                intConfigs.Add("password", 1024);
-                floatConfigs.Add("responseTime", 60);
-                floatConfigs.Add("votingTime", 30);
-                floatConfigs.Add("resultsTime", 15);
-                boolConfigs.Add("isDebugging", true);
-                boolConfigs.Add("isDebuggingTicks", false);
+                EnsureDefaultConfigs();
                 SaveConfig();
             }
         }
@@ -187,6 +183,17 @@ namespace FactioServer
             floatConfigs.Remove(configKey);
             boolConfigs.Remove(configKey);
             if (save) SaveConfig();
+        }
+
+        private void EnsureDefaultConfigs()
+        {
+            if (!TryGetIntConfig("pollPeriod", out _)) intConfigs.Add("pollPeriod", 1);
+            if (!TryGetIntConfig("password", out _)) intConfigs.Add("password", factioServer.rand.Next(0, int.MaxValue));
+            if (!TryGetFloatConfig("responseTime", out _)) floatConfigs.Add("responseTime", 60);
+            if (!TryGetFloatConfig("votingTime", out _)) floatConfigs.Add("votingTime", 30);
+            if (!TryGetFloatConfig("resultsTime", out _)) floatConfigs.Add("resultsTime", 15);
+            if (!TryGetBoolConfig("isDebugging", out _)) boolConfigs.Add("isDebugging", true);
+            if (!TryGetBoolConfig("isDebuggingTicks", out _)) boolConfigs.Add("isDebuggingTicks", false);
         }
 
         private string GetBoolString(bool value)

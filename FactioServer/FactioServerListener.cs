@@ -107,12 +107,18 @@ namespace FactioServer
             FactioPlayer player = factioServer.GetPlayer(peer);
             if (packet.password == factioServer.configRegistry.GetIntConfig("password"))
             {
-                Console.WriteLine($"[Factio Server Listener] Client with id {player.clientId}, named \"{player.username}\" is executing a command: {packet.command}");
-                factioServer.commandHandler.Handle(packet.command);
+                Console.WriteLine($"[Factio Server Listener] Client with id {player.clientId} and ip {peer.EndPoint.Address}, named \"{player.username}\" is executing a command: {packet.command}");
+                string output = factioServer.commandHandler.Handle(packet.command, true);
+                ServerMessageCPacket serverMessage = new ServerMessageCPacket
+                { Message = output };
+                peer.Send(packetProcessor.Write(serverMessage), DeliveryMethod.ReliableOrdered);
             }
             else
             {
-                Console.WriteLine($"[Factio Server Listener] Client with id {player.clientId}, named \"{player.username}\" attempted to execute a command: {packet.command}");
+                Console.WriteLine($"[Factio Server Listener] Client with id {player.clientId} and ip {peer.EndPoint.Address}, named \"{player.username}\" attempted to execute a command: {packet.command}");
+                ServerMessageCPacket serverMessage = new ServerMessageCPacket
+                { Message = "[Factio Server] Incorrect password" };
+                peer.Send(packetProcessor.Write(serverMessage), DeliveryMethod.ReliableOrdered);
             }
         }
         #endregion ReceivedPacketImplementation

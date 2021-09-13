@@ -23,27 +23,29 @@ namespace FactioServer
 
         public void JoinGame(FactioGame game)
         {
+            if (InGame)
+                Game.LeaveGame();
             Game = game;
         }
         public void LeaveGame()
         {
             if (InGame)
                 Game.LeaveGame();
+            Game = null;
         }
 
         public void Ready(bool value)
         {
             IsReady = value;
-            Game.ReadyUpdate();
+            if (InGame)
+                Game.ReadyUpdate();
         }
-
         public void Respond(string response)
         {
             HasResponded = true;
             if (InGame)
                 Game.GiveResponse(this, response);
         }
-
         public void Vote(bool voteIsB)
         {
             HasVoted = true;
