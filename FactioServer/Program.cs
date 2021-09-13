@@ -6,37 +6,37 @@ using System.Threading;
 
 namespace FactioServer
 {
-    class Program
+    public class Program
     {
         public const double TPS = 20;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Console.WriteLine("[Factio Server] Hello World!");
-            Console.WriteLine("[Factio Server] Factio Server v0.2");
-            Console.WriteLine("[Factio Server] Starting server...");
+            LogLine(LoggingTag.FactioServer, "Hello World!");
+            LogLine(LoggingTag.FactioServer, "Factio Server v0.3");
+            LogLine(LoggingTag.FactioServer, "Starting server...");
 
             long SystemTPS;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SystemTPS = 10000000;
-                Console.WriteLine("[Factio Server] Oooooo, Windows!");
+                LogLine(LoggingTag.FactioServer, "Oooooo, Windows!");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 SystemTPS = 1000000000;
-                Console.WriteLine("[Factio Server] Oooooo, Linux!");
+                LogLine(LoggingTag.FactioServer, "Oooooo, Linux!");
             }
             else
             {
-                Console.WriteLine("[Factio Server] Unsupported OS detected! Stopping!");
+                LogLine(LoggingTag.FactioServer, "Unsupported OS detected! Stopping!");
                 return;
             }
             long TimePerTick = (long)(SystemTPS / TPS);
 
             FactioServer factioServer = new FactioServer();
 
-            Console.WriteLine("[Factio Server] Started polling for incoming data");
+            LogLine(LoggingTag.FactioServer, "Started polling for incoming data");
 
             factioServer.commandHandler.Handle("help");
 
@@ -58,7 +58,7 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    if (factioServer.isDebuggingTicks) Console.WriteLine("[Factio Server] [Debug] Tick: " + nextTickId);
+                    if (factioServer.isDebuggingTicks) LogLine(LoggingTag.FactioServer, "[Debug] Tick: " + nextTickId);
                     nextTickId++;
                     if (File.Exists($"{Directory.GetCurrentDirectory()}/quit.req"))
                     {
@@ -91,7 +91,42 @@ namespace FactioServer
                 }
                 Thread.Sleep(factioServer.PollPeriod);
             }
-            factioServer.commandHandler.OutputLine("[Factio Server] Exiting");
+            factioServer.commandHandler.OutputLine(LoggingTag.FactioServer, "Exiting");
         }
+
+        public static string GetTag(LoggingTag tag)
+        {
+            return tag switch
+            {
+                LoggingTag.None => "",
+                LoggingTag.FactioServer => "[Factio Server] ",
+                LoggingTag.CommandHandler => "[Command Handler] ",
+                LoggingTag.ConfigRegistry => "[Config Registry] ",
+                LoggingTag.FactioServerListener => "[Factio Server Listener] ",
+                LoggingTag.ScenarioRegistry => "[Scenario Registry] ",
+                LoggingTag.FactioGame => "[Factio Game] ",
+                _ => "[Factio Server] ",
+            };
+        }
+
+        public static void Log(LoggingTag tag, string text)
+        {
+            Console.Write(GetTag(tag) + text);
+        }
+        public static void LogLine(LoggingTag tag, string text)
+        {
+            Console.WriteLine(GetTag(tag) + text);
+        }
+    }
+
+    public enum LoggingTag
+    {
+        None,
+        FactioServer,
+        CommandHandler,
+        ConfigRegistry,
+        FactioServerListener,
+        ScenarioRegistry,
+        FactioGame
     }
 }

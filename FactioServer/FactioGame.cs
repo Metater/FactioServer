@@ -51,7 +51,7 @@ namespace FactioServer
                     if (!isPhaseInit)
                     {
                         isPhaseInit = true;
-                        if (factioServer.IsDebugging) Console.WriteLine($"[Factio Game] [Debug] Response Start, led by \"{players[0].username}\"");
+                        if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"[Debug] Response Start, led by \"{players[0].username}\"");
                     }
                     if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("responseTime"))
                     {
@@ -63,7 +63,7 @@ namespace FactioServer
                     {
                         isPhaseInit = true;
                         SendVotingStart();
-                        if (factioServer.IsDebugging) Console.WriteLine($"[Factio Game] [Debug] Voting Start, led by \"{players[0].username}\"");
+                        if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"[Debug] Voting Start, led by \"{players[0].username}\"");
                     }
                     if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("votingTime"))
                     {
@@ -75,7 +75,7 @@ namespace FactioServer
                     {
                         isPhaseInit = true;
                         SendResultsStart();
-                        if (factioServer.IsDebugging) Console.WriteLine($"[Factio Game] [Debug] Results Start, led by \"{players[0].username}\"");
+                        if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"[Debug] Results Start, led by \"{players[0].username}\"");
                     }
                     if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("resultsTime"))
                     {
@@ -135,7 +135,7 @@ namespace FactioServer
         {
             gameStartTick = factioServer.lastTick;
             HasGameStarted = true;
-            Console.WriteLine($"[Factio Game] Game started, led by \"{players[0].username}\"");
+            Program.LogLine(LoggingTag.FactioGame, $"Game started, led by \"{players[0].username}\"");
             StartRound();
         }
 
@@ -200,7 +200,7 @@ namespace FactioServer
             votes.Add((player, voteIsB));
             foreach (FactioPlayer p in players)
             {
-                if (factioServer.IsDebugging) Console.WriteLine("[Factio Game] [Debug] Voted: " + p.HasVoted);
+                if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, "[Debug] Voted: " + p.HasVoted);
                 if (!p.HasVoted) return;
             }
             UpdatePhase(GamePhase.Results);

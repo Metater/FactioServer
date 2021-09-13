@@ -53,28 +53,28 @@ namespace FactioServer
         {
             if (File.Exists(scenarioRegistryPath))
             {
-                factioServer.commandHandler.OutputLine("[Scenario Registry] Loading the scenario registry");
+                factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "Loading the scenario registry");
                 string[] unloadedScenarios = File.ReadAllLines(scenarioRegistryPath);
 
                 for (int i = 0; i < unloadedScenarios.Length; i++)
                     scenarios.Add(Scenario.Load(i, unloadedScenarios[i]));
 
-                factioServer.commandHandler.OutputLine("[Scenario Registry] Finished loading the scenario registry");
+                factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "Finished loading the scenario registry");
 
                 if (factioServer.IsDebugging) ListScenarios();
             }
             else
             {
-                factioServer.commandHandler.OutputLine("[Scenario Registry] No scenarios found, creating empty file");
+                factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "No scenarios found, creating empty file");
                 File.WriteAllText(scenarioRegistryPath, "");
             }
         }
 
         public void ListScenarios()
         {
-            factioServer.commandHandler.OutputLine($"[Scenario Registry] Listing scenarios: ");
+            factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, $"Listing scenarios: ");
             for (int i = 0; i < scenarios.Count; i++)
-                factioServer.commandHandler.OutputLine($"\tScenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
+                factioServer.commandHandler.OutputLine(LoggingTag.None, $"\tScenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
         }
 
         private void SaveScenarios()

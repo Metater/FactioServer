@@ -28,32 +28,32 @@ namespace FactioServer
             string[] commandSplit = command.Split(' ');
             if (commandSplit.Length < 1)
             {
-                OutputLine("[Command Handler] Can't parse whitespace");
+                OutputLine(LoggingTag.CommandHandler, "Can't parse whitespace");
                 return CommandReturn();
             }
             switch (commandSplit[0])
             {
                 case "help":
-                    OutputLine("[Command Handler] Commands: ");
+                    OutputLine(LoggingTag.CommandHandler, "Commands: ");
 
-                    OutputLine("\texit");
-                    OutputLine("\tclear");
+                    OutputLine(LoggingTag.None, "\texit");
+                    OutputLine(LoggingTag.None, "\tclear");
 
-                    OutputLine("\treload");
-                    OutputLine("\t\tscenarios");
-                    OutputLine("\t\tconfig");
+                    OutputLine(LoggingTag.None, "\treload");
+                    OutputLine(LoggingTag.None, "\t\tscenarios");
+                    OutputLine(LoggingTag.None, "\t\tconfig");
 
-                    OutputLine("\tconfig");
-                    OutputLine("\t\tget configName");
-                    OutputLine("\t\tset configName configValue");
-                    OutputLine("\t\tremove configName");
-                    OutputLine("\t\tlist");
+                    OutputLine(LoggingTag.None, "\tconfig");
+                    OutputLine(LoggingTag.None, "\t\tget configName");
+                    OutputLine(LoggingTag.None, "\t\tset configName configValue");
+                    OutputLine(LoggingTag.None, "\t\tremove configName");
+                    OutputLine(LoggingTag.None, "\t\tlist");
 
-                    OutputLine("\tscenarios");
-                    OutputLine("\t\tadd scenarioText");
-                    OutputLine("\t\tremove scenarioId");
-                    OutputLine("\t\treplace scenarioId scenarioText");
-                    OutputLine("\t\tlist");
+                    OutputLine(LoggingTag.None, "\tscenarios");
+                    OutputLine(LoggingTag.None, "\t\tadd scenarioText");
+                    OutputLine(LoggingTag.None, "\t\tremove scenarioId");
+                    OutputLine(LoggingTag.None, "\t\treplace scenarioId scenarioText");
+                    OutputLine(LoggingTag.None, "\t\tlist");
                     break;
                 case "exit":
                     factioServer.isExitRequested = true;
@@ -83,20 +83,20 @@ namespace FactioServer
                         case "get":
                             if (TermCountError(command, 3)) return CommandReturn();
                             if (factioServer.configRegistry.TryGetConfigValueString(commandSplit[2], out string value))
-                                OutputLine($"[Core] Config \"{commandSplit[2]}\" value: {value}");
+                                OutputLine(LoggingTag.ConfigRegistry, $"Config \"{commandSplit[2]}\" value: {value}");
                             else
-                                OutputLine($"[Core] Unknown config \"{commandSplit[2]}\"");
+                                OutputLine(LoggingTag.ConfigRegistry, $"Unknown config \"{commandSplit[2]}\"");
                             break;
                         case "set":
                             if (TermCountError(command, 4)) return CommandReturn();
                             if (factioServer.configRegistry.ParseConfig(commandSplit[2], commandSplit[3]))
-                                OutputLine($"[Core] Config \"{commandSplit[2]}\" updated with value: {commandSplit[3]}");
+                                OutputLine(LoggingTag.ConfigRegistry, $"Config \"{commandSplit[2]}\" updated with value: {commandSplit[3]}");
                             else
-                                OutputLine($"[Core] Could not parse config and value");
+                                OutputLine(LoggingTag.ConfigRegistry, $"Could not parse config and value");
                             break;
                         case "remove":
                             if (TermCountError(command, 3)) return CommandReturn();
-                            OutputLine($"[Core] Removing config \"{commandSplit[2]}\"");
+                            OutputLine(LoggingTag.ConfigRegistry, $"Removing config \"{commandSplit[2]}\"");
                             factioServer.configRegistry.RemoveConfig(commandSplit[2], true);
                             break;
                         case "list":
@@ -130,21 +130,23 @@ namespace FactioServer
                     }
                     break;
                 default:
-                    OutputLine($"[Command Handler] Unknown command: {command}");
+                    OutputLine(LoggingTag.CommandHandler, $"Unknown command: {command}");
                     break;
             }
             return CommandReturn();
         }
 
-        public void Output(string text, bool line = false)
+        public void Output(LoggingTag tag, string text)
         {
+            text = Program.GetTag(tag) + text;
             if (!redirectingOutput)
                 Console.Write(text);
             if (currentlyExecuting)
                 output += text;
         }
-        public void OutputLine(string text)
+        public void OutputLine(LoggingTag tag, string text)
         {
+            text = Program.GetTag(tag) + text;
             if (!redirectingOutput)
                 Console.WriteLine(text);
             if (currentlyExecuting)
@@ -161,7 +163,7 @@ namespace FactioServer
         private void SubcommandError(string command)
         {
             string[] commandSplit = command.Split(' ');
-            OutputLine($"[Command Handler] Unknown subcommand of {commandSplit[1]}: {command}");
+            OutputLine(LoggingTag.CommandHandler, $"Unknown subcommand of {commandSplit[1]}: {command}");
         }
 
         private bool TermCountError(string command, int expectedTermCount)
@@ -169,7 +171,7 @@ namespace FactioServer
             string[] commandSplit = command.Split(' ');
             if (commandSplit.Length != expectedTermCount)
             {
-                OutputLine($"[Command Handler] Expected {expectedTermCount} terms in command: {command}");
+                OutputLine(LoggingTag.CommandHandler, $"Expected {expectedTermCount} terms in command: {command}");
                 return true;
             }
             return false;

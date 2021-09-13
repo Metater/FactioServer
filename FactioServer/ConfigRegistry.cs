@@ -78,7 +78,7 @@ namespace FactioServer
             boolConfigs.Clear();
             if (File.Exists(configRegistryPath))
             {
-                factioServer.commandHandler.OutputLine("[Config Registry] Loading the config registry");
+                factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, "Loading the config registry");
                 string[] configs = File.ReadAllLines(configRegistryPath);
                 for (int i = 0; i < configs.Length; i++)
                 {
@@ -86,14 +86,14 @@ namespace FactioServer
                     string[] configPair = config.Split(' ');
                     if (configPair.Length == 2)
                         if (ParseConfig(configPair[0], configPair[1])) continue;
-                    factioServer.commandHandler.OutputLine($"[Config Registry] Could not parse config line index {i}: {config}");
+                    factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, $"Could not parse config line index {i}: {config}");
                 }
                 EnsureDefaultConfigs();
                 SaveConfig();
             }
             else
             {
-                factioServer.commandHandler.OutputLine("[Config Registry] No configs found, creating and loading default file");
+                factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, "No configs found, creating and loading default file");
                 EnsureDefaultConfigs();
                 SaveConfig();
             }
@@ -155,11 +155,11 @@ namespace FactioServer
         public void ListConfig()
         {
             string[] configs = File.ReadAllLines(configRegistryPath);
-            factioServer.commandHandler.OutputLine("[Config Registry] Configs: ");
+            factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, "Configs: ");
             for (int i = 0; i < configs.Length; i++)
             {
                 string config = configs[i];
-                factioServer.commandHandler.OutputLine($"\t{i}: {config}");
+                factioServer.commandHandler.OutputLine(LoggingTag.None, $"\t{i}: {config}");
             }
         }
 
