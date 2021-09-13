@@ -94,7 +94,7 @@ namespace FactioServer
             factioServer.commandHandler.OutputLine(LoggingTag.FactioServer, "Exiting");
         }
 
-        public static string GetTag(LoggingTag tag)
+        public static string GetLoggingTag(LoggingTag tag)
         {
             return tag switch
             {
@@ -105,17 +105,17 @@ namespace FactioServer
                 LoggingTag.FactioServerListener => "[Factio Server Listener] ",
                 LoggingTag.ScenarioRegistry => "[Scenario Registry] ",
                 LoggingTag.FactioGame => "[Factio Game] ",
-                _ => "[Factio Server] ",
+                _ => "[Unimplemented Logging Tag] ",
             };
         }
 
-        public static void Log(LoggingTag tag, string text)
+        public static void Log(LoggingTag loggingTag, string text)
         {
-            Console.Write(GetTag(tag) + text);
+            Console.Write(GetLoggingTag(loggingTag) + text);
         }
-        public static void LogLine(LoggingTag tag, string text)
+        public static void LogLine(LoggingTag loggingTag, string text)
         {
-            Console.WriteLine(GetTag(tag) + text);
+            Console.WriteLine(GetLoggingTag(loggingTag) + text);
         }
     }
 
