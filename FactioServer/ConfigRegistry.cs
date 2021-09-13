@@ -47,7 +47,7 @@ namespace FactioServer
         {
             if (intConfigs.ContainsKey(configKey))
             {
-                value = floatConfigs[configKey];
+                value = intConfigs[configKey];
                 return true;
             }
             return floatConfigs.TryGetValue(configKey, out value);
@@ -97,6 +97,8 @@ namespace FactioServer
                 EnsureDefaultConfigs();
                 SaveConfig();
             }
+
+            if (factioServer.IsDebugging) ListConfig();
         }
 
         public void SaveConfig()
@@ -150,7 +152,7 @@ namespace FactioServer
             return ConfigType.Unknown;
         }
 
-        public void ListConfigs()
+        public void ListConfig()
         {
             string[] configs = File.ReadAllLines(configRegistryPath);
             factioServer.commandHandler.OutputLine("[Config Registry] Configs: ");

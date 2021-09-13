@@ -38,6 +38,8 @@ namespace FactioServer
 
             Console.WriteLine("[Factio Server] Started polling for incoming data");
 
+            factioServer.commandHandler.Handle("help");
+
             var lastTick = new Stopwatch();
             lastTick.Start();
             long timerTicks = 0;

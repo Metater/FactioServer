@@ -25,7 +25,14 @@ namespace FactioServer
             return scenarios[factioServer.rand.Next(0, scenarios.Count)];
         }
 
-        public bool DeleteScenario(int id)
+        public void AddScenario(string scenarioText)
+        {
+            int id = scenarios.Count;
+            scenarios.Add(new Scenario(id, scenarioText));
+            SaveScenarios();
+        }
+
+        public bool RemoveScenario(int id)
         {
             if (scenarios.Count <= id) return false;
             scenarios.RemoveAt(id);
@@ -34,10 +41,10 @@ namespace FactioServer
             return true;
         }
 
-        public bool ReplaceScenario(int id, string unloadedScenario)
+        public bool ReplaceScenario(int id, string scenarioText)
         {
             if (scenarios.Count <= id) return false;
-            scenarios[id].text = unloadedScenario;
+            scenarios[id].text = scenarioText;
             SaveScenarios();
             return true;
         }
@@ -50,23 +57,24 @@ namespace FactioServer
                 string[] unloadedScenarios = File.ReadAllLines(scenarioRegistryPath);
 
                 for (int i = 0; i < unloadedScenarios.Length; i++)
-                {
                     scenarios.Add(Scenario.Load(i, unloadedScenarios[i]));
-                }
-
-                for (int i = 0; i < scenarios.Count; i++)
-                {
-                    if (factioServer.IsDebugging)
-                        factioServer.commandHandler.OutputLine($"[Scenario Registry] [Debug] Scenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
-                }
 
                 factioServer.commandHandler.OutputLine("[Scenario Registry] Finished loading the scenario registry");
+
+                if (factioServer.IsDebugging) ListScenarios();
             }
             else
             {
                 factioServer.commandHandler.OutputLine("[Scenario Registry] No scenarios found, creating empty file");
                 File.WriteAllText(scenarioRegistryPath, "");
             }
+        }
+
+        public void ListScenarios()
+        {
+            factioServer.commandHandler.OutputLine($"[Scenario Registry] Listing scenarios: ");
+            for (int i = 0; i < scenarios.Count; i++)
+                factioServer.commandHandler.OutputLine($"\tScenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
         }
 
         private void SaveScenarios()

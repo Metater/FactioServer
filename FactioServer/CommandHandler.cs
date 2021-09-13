@@ -39,13 +39,21 @@ namespace FactioServer
                     OutputLine("\texit");
                     OutputLine("\tclear");
 
-                    OutputLine("\treload scenarios");
-                    OutputLine("\treload config");
+                    OutputLine("\treload");
+                    OutputLine("\t\tscenarios");
+                    OutputLine("\t\tconfig");
 
-                    OutputLine("\tconfig get configName");
-                    OutputLine("\tconfig set configName configValue");
-                    OutputLine("\tconfig del configName");
-                    OutputLine("\tconfig list");
+                    OutputLine("\tconfig");
+                    OutputLine("\t\tget configName");
+                    OutputLine("\t\tset configName configValue");
+                    OutputLine("\t\tremove configName");
+                    OutputLine("\t\tlist");
+
+                    OutputLine("\tscenarios");
+                    OutputLine("\t\tadd scenarioText");
+                    OutputLine("\t\tremove scenarioId");
+                    OutputLine("\t\treplace scenarioId scenarioText");
+                    OutputLine("\t\tlist");
                     break;
                 case "exit":
                     factioServer.isExitRequested = true;
@@ -86,13 +94,35 @@ namespace FactioServer
                             else
                                 OutputLine($"[Core] Could not parse config and value");
                             break;
-                        case "del":
+                        case "remove":
                             if (TermCountError(command, 3)) return CommandReturn();
-                            OutputLine($"[Core] Deleting config \"{commandSplit[2]}\"");
+                            OutputLine($"[Core] Removing config \"{commandSplit[2]}\"");
                             factioServer.configRegistry.RemoveConfig(commandSplit[2], true);
                             break;
                         case "list":
-                            factioServer.configRegistry.ListConfigs();
+                            factioServer.configRegistry.ListConfig();
+                            break;
+                        default:
+                            SubcommandError(command);
+                            break;
+                    }
+                    break;
+                case "scenarios":
+                    switch (commandSplit[1])
+                    {
+                        case "add":
+                            if (TermCountError(command, 3)) return CommandReturn();
+                            string scenarioText = command.Substring(command.IndexOf(commandSplit[1]) + commandSplit[1].Length);
+                            factioServer.scenarioRegistry.AddScenario(scenarioText);
+                            break;
+                        case "remove":
+                            if (TermCountError(command, 3)) return CommandReturn();
+                            break;
+                        case "replace":
+                            if (TermCountError(command, 4)) return CommandReturn();
+                            break;
+                        case "list":
+                            factioServer.scenarioRegistry.ListScenarios();
                             break;
                         default:
                             SubcommandError(command);
@@ -106,16 +136,19 @@ namespace FactioServer
             return CommandReturn();
         }
 
-        public void Output(string text)
+        public void Output(string text, bool line = false)
         {
             if (!redirectingOutput)
-                Console.WriteLine(output);
+                Console.Write(text);
             if (currentlyExecuting)
                 output += text;
         }
         public void OutputLine(string text)
         {
-            Output(text + "\n");
+            if (!redirectingOutput)
+                Console.WriteLine(text);
+            if (currentlyExecuting)
+                output += text + "\n";
         }
 
         private string CommandReturn()
