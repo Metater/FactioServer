@@ -10,6 +10,7 @@ namespace FactioServer
     {
         private FactioServer factioServer;
 
+        public int joinCode;
         public List<FactioPlayer> players = new List<FactioPlayer>();
         public bool HasGameStarted { get; private set; } = false;
 
@@ -35,9 +36,10 @@ namespace FactioServer
 
         // scenario repeat protection
 
-        public FactioGame(FactioServer factioServer, FactioPlayer leader)
+        public FactioGame(FactioServer factioServer, int joinCode, FactioPlayer leader)
         {
             this.factioServer = factioServer;
+            this.joinCode = joinCode;
             players.Add(leader);
         }
 
@@ -85,9 +87,14 @@ namespace FactioServer
             }
         }
 
-        public void LeaveGame()
+        public void LeaveGame(FactioPlayer player)
         {
-
+            int playerIndex = players.IndexOf(player);
+            if (playerIndex < players.Count) return;
+            if (playerIndex == 0)
+            {
+                EndGame();
+            }
         }
 
         public bool TryJoinGame(FactioPlayer player)
@@ -137,6 +144,11 @@ namespace FactioServer
             HasGameStarted = true;
             Program.LogLine(LoggingTag.FactioGame, $"Game started, led by \"{players[0].username}\"");
             StartRound();
+        }
+
+        public void EndGame()
+        {
+
         }
 
         public void StartRound()

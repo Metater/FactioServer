@@ -30,7 +30,7 @@ namespace FactioServer
         public void LeaveGame()
         {
             if (InGame)
-                Game.LeaveGame();
+                Game.LeaveGame(this);
             Game = null;
         }
 

@@ -36,7 +36,7 @@ namespace FactioServer
                 joinCode = factioServer.rand.Next(1000, 10000);
                 tries++;
             }
-            FactioGame game = new FactioGame(factioServer, leader);
+            FactioGame game = new FactioGame(factioServer, joinCode, leader);
             games.Add(joinCode, game);
             leader.JoinGame(game);
             JoinedLobby(peer, joinCode);
@@ -58,6 +58,11 @@ namespace FactioServer
                 }
             }
             return false;
+        }
+
+        public bool EndLobby(FactioGame game)
+        {
+            return games.Remove(game.joinCode);
         }
 
         private void JoinedLobby(NetPeer peer, int joinCode)

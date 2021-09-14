@@ -43,6 +43,12 @@ namespace FactioShared
     {
         public int JoinCode { get; set; }
     }
+    public class CloseLobbyCPacket
+    {
+        public byte Reason { get; set; }
+        // Server shutdown
+        // Leader left
+    }
     public class PlayerUpdateCPacket
     {
         public string[] Usernames { get; set; }
@@ -78,12 +84,6 @@ namespace FactioShared
         public short PlayerAIndex { get; set; }
         public short PlayerBIndex { get; set; }
         // eventually ad everyone's score
-    }
-    public class GameEndCPacket
-    { 
-        public string Reason { get; set; }
-        // Server shutdown
-        // Leader left
     }
     public class ServerMessageCPacket
     {

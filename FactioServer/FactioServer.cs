@@ -69,7 +69,8 @@ namespace FactioServer
 
         public void PeerDisconnected(NetPeer peer)
         {
-            // do important stuff
+            FactioPlayer player = GetPlayer(peer);
+            player.LeaveGame();
         }
 
         public FactioPlayer GetPlayer(int clientId)
