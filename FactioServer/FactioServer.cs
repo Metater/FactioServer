@@ -35,6 +35,7 @@ namespace FactioServer
             commandHandler = new CommandHandler(this);
             configRegistry = new ConfigRegistry(this);
             LoadServerConfig();
+            scenarioRegistry = new ScenarioRegistry(this);
 
             listener = new FactioServerListener(this);
             server = new NetManager(listener);
@@ -42,12 +43,11 @@ namespace FactioServer
             Program.LogLine(LoggingTag.FactioServer, "Server listening for connections on port 12733");
 
             gameManager = new GameManager(this);
-            scenarioRegistry = new ScenarioRegistry(this);
         }
 
         public void LoadServerConfig()
         {
-            commandHandler.OutputLine(LoggingTag.FactioServer, "Reloading server config");
+            commandHandler.OutputLine(LoggingTag.FactioServer, "Loading server config");
             IsDebugging = configRegistry.GetBoolConfig("isDebugging");
             isDebuggingTicks = configRegistry.GetBoolConfig("isDebuggingTicks");
             PollPeriod = configRegistry.GetIntConfig("pollPeriod");

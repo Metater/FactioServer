@@ -58,7 +58,7 @@ namespace FactioServer
                 {
                     timerTicks -= TimePerTick;
                     factioServer.Tick(nextTickId);
-                    if (factioServer.isDebuggingTicks) LogLine(LoggingTag.FactioServer, "[Debug] Tick: " + nextTickId);
+                    if (factioServer.isDebuggingTicks) LogLine(LoggingTag.FactioServer, "Tick: " + nextTickId, true);
                     nextTickId++;
                     if (File.Exists($"{Directory.GetCurrentDirectory()}/quit.req"))
                     {
@@ -94,9 +94,9 @@ namespace FactioServer
             factioServer.commandHandler.OutputLine(LoggingTag.FactioServer, "Exiting");
         }
 
-        public static string GetLoggingTag(LoggingTag tag)
+        public static string GetLoggingTag(LoggingTag loggingTag, bool debug = false)
         {
-            return tag switch
+            string text = loggingTag switch
             {
                 LoggingTag.None => "",
                 LoggingTag.FactioServer => "[Factio Server] ",
@@ -107,15 +107,17 @@ namespace FactioServer
                 LoggingTag.FactioGame => "[Factio Game] ",
                 _ => "[Unimplemented Logging Tag] ",
             };
+            if (debug) text += "[Debug] ";
+            return text;
         }
 
-        public static void Log(LoggingTag loggingTag, string text)
+        public static void Log(LoggingTag loggingTag, string text, bool debug = false)
         {
-            Console.Write(GetLoggingTag(loggingTag) + text);
+            Console.Write(GetLoggingTag(loggingTag, debug) + text);
         }
-        public static void LogLine(LoggingTag loggingTag, string text)
+        public static void LogLine(LoggingTag loggingTag, string text, bool debug = false)
         {
-            Console.WriteLine(GetLoggingTag(loggingTag) + text);
+            Console.WriteLine(GetLoggingTag(loggingTag, debug) + text);
         }
     }
 

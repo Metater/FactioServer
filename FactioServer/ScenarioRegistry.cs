@@ -61,7 +61,7 @@ namespace FactioServer
 
                 factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "Finished loading the scenario registry");
 
-                if (factioServer.IsDebugging) ListScenarios();
+                if (factioServer.IsDebugging) ListScenarios(true);
             }
             else
             {
@@ -70,9 +70,9 @@ namespace FactioServer
             }
         }
 
-        public void ListScenarios()
+        public void ListScenarios(bool debug = false)
         {
-            factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, $"Listing scenarios: ");
+            factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, $"Listing scenarios: ", debug);
             for (int i = 0; i < scenarios.Count; i++)
                 factioServer.commandHandler.OutputLine(LoggingTag.None, $"\tScenario {i}: {scenarios[i].Compile("Player A", "Player B")}");
         }

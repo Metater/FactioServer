@@ -136,17 +136,17 @@ namespace FactioServer
             return CommandReturn();
         }
 
-        public void Output(LoggingTag loggingTag, string text)
+        public void Output(LoggingTag loggingTag, string text, bool debug = false)
         {
-            text = Program.GetLoggingTag(loggingTag) + text;
+            text = Program.GetLoggingTag(loggingTag, debug) + text;
             if (!redirectingOutput)
                 Console.Write(text);
             if (currentlyExecuting)
                 output += text;
         }
-        public void OutputLine(LoggingTag loggingTag, string text)
+        public void OutputLine(LoggingTag loggingTag, string text, bool debug = false)
         {
-            text = Program.GetLoggingTag(loggingTag) + text;
+            text = Program.GetLoggingTag(loggingTag, debug) + text;
             if (!redirectingOutput)
                 Console.WriteLine(text);
             if (currentlyExecuting)

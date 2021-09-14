@@ -98,7 +98,7 @@ namespace FactioServer
                 SaveConfig();
             }
 
-            if (factioServer.IsDebugging) ListConfig();
+            if (boolConfigs["isDebugging"]) ListConfig(true);
         }
 
         public void SaveConfig()
@@ -152,10 +152,10 @@ namespace FactioServer
             return ConfigType.Unknown;
         }
 
-        public void ListConfig()
+        public void ListConfig(bool debug = false)
         {
             string[] configs = File.ReadAllLines(configRegistryPath);
-            factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, "Configs: ");
+            factioServer.commandHandler.OutputLine(LoggingTag.ConfigRegistry, "Configs: ", debug);
             for (int i = 0; i < configs.Length; i++)
             {
                 string config = configs[i];
