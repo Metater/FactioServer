@@ -81,8 +81,8 @@ namespace FactioServer
                         if (input.Length > 0)
                         {
                             input = input.Remove(input.Length - 1);
-                            if (lastChar != 8 && lastChar != 127) Console.WriteLine();
-                            Console.WriteLine(input);
+                            //if (lastChar != 8 && lastChar != 127) Console.WriteLine();
+                            Console.Write("\n" + input);
                         }
                     }
                     else

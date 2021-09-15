@@ -24,7 +24,7 @@ namespace FactioServer
         public void JoinGame(FactioGame game)
         {
             if (InGame)
-                Game.LeaveGame();
+                Game.LeaveGame(this);
             Game = game;
         }
         public void LeaveGame()
