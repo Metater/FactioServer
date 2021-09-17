@@ -65,6 +65,14 @@ namespace FactioServer
             return games.Remove(game.joinCode);
         }
 
+        public void ServerShutdown()
+        {
+            foreach (KeyValuePair<int, FactioGame> game in games)
+            {
+                game.Value.EndGame(LobbyClose.ServerShutdown);
+            }
+        }
+
         private void JoinedLobby(NetPeer peer, int joinCode)
         {
             JoinedLobbyCPacket joinedLobby = new JoinedLobbyCPacket

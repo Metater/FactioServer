@@ -6,6 +6,7 @@ using System.Text;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using FactioShared;
+using System.Text.RegularExpressions;
 
 namespace FactioServer
 {
@@ -20,6 +21,7 @@ namespace FactioServer
             this.factioServer = factioServer;
             packetProcessor.SubscribeReusable<CreateLobbySPacket, NetPeer>(OnCreateLobbySPacketReceived);
             packetProcessor.SubscribeReusable<JoinLobbySPacket, NetPeer>(OnJoinLobbySPacketReceived);
+            packetProcessor.SubscribeReusable<LeaveLobbySPacket, NetPeer>(OnLeaveLobbySPacketReceived);
             packetProcessor.SubscribeReusable<ReadySPacket, NetPeer>(OnReadySPacketReceived);
             packetProcessor.SubscribeReusable<ResponseSPacket, NetPeer>(OnResponseSPacketReceived);
             packetProcessor.SubscribeReusable<VoteSPacket, NetPeer>(OnVoteSPacketReceived);
@@ -29,7 +31,7 @@ namespace FactioServer
         #region NetworkEvents
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            if (factioServer.server.ConnectedPeersCount < 256)
+            if (factioServer.server.ConnectedPeersCount < 100)
                 request.AcceptIfKey("Factio");
             else
                 request.Reject();
@@ -67,6 +69,7 @@ namespace FactioServer
         #region ReceivedPacketImplementation
         private void OnCreateLobbySPacketReceived(CreateLobbySPacket packet, NetPeer peer)
         {
+            if (!NameValid(packet.Username)) return;
             FactioPlayer player = factioServer.GetPlayer(peer);
             player.username = packet.Username;
             if (factioServer.gameManager.TryCreateLobby(peer, player))
@@ -76,12 +79,18 @@ namespace FactioServer
         }
         private void OnJoinLobbySPacketReceived(JoinLobbySPacket packet, NetPeer peer)
         {
+            if (!NameValid(packet.Username)) return;
             FactioPlayer player = factioServer.GetPlayer(peer);
             player.username = packet.Username;
             if (factioServer.gameManager.TryJoinLobby(peer, player, packet.JoinCode))
             {
                 Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" joined a lobby");
             }
+        }
+        private void OnLeaveLobbySPacketReceived(LeaveLobbySPacket packet, NetPeer peer)
+        {
+            FactioPlayer player = factioServer.GetPlayer(peer);
+            player.LeaveGame();
         }
         private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
         {
@@ -122,5 +131,13 @@ namespace FactioServer
             }
         }
         #endregion ReceivedPacketImplementation
+
+        #region HelperMethods
+        private static bool NameValid(string name)
+        {
+            Match match = Regex.Match(name, "<.*?>");
+            return !match.Success;
+        }
+        #endregion HelperMethods
     }
 }

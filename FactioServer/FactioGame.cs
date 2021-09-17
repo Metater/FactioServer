@@ -91,10 +91,12 @@ namespace FactioServer
         {
             int playerIndex = players.IndexOf(player);
             if (playerIndex < players.Count) return;
-            if (playerIndex == 0)
-            {
-                EndGame();
-            }
+
+            if (playerIndex == 0) EndGame(LobbyClose.LeaderLeft);
+            if (players.Count <= 1) EndGame(LobbyClose.OnlyPlayer);
+
+            players.RemoveAt(playerIndex);
+            // recompute player indexes
         }
 
         public bool TryJoinGame(FactioPlayer player)
@@ -146,9 +148,14 @@ namespace FactioServer
             StartRound();
         }
 
-        public void EndGame()
+        public void EndGame(LobbyClose reason)
         {
-
+            CloseLobbyCPacket closeLobby = new CloseLobbyCPacket
+            { Reason = (byte)reason };
+            players.ForEach((p) =>
+            GetNetPeer(p).Send(factioServer.listener.packetProcessor.Write(closeLobby), DeliveryMethod.ReliableOrdered));
+            Program.LogLine(LoggingTag.FactioGame, $"Game ended, led by \"{players[0].username}\"");
+            factioServer.gameManager.EndLobby(this);
         }
 
         public void StartRound()
