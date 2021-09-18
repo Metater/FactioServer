@@ -51,7 +51,12 @@ namespace FactioShared
     }
     public class PlayerUpdateCPacket
     {
+        public int[] PlayerIds { get; set; }
         public string[] Usernames { get; set; }
+    }
+    public class ReadyUpdateCPacket
+    {
+        public int[] ReadyPlayerIds { get; set; }
     }
     // Packets that happen within rounds
     // Server randomly decides 1 scenario per round, can make voting later
@@ -84,6 +89,11 @@ namespace FactioShared
         public short PlayerAIndex { get; set; }
         public short PlayerBIndex { get; set; }
         // eventually ad everyone's score
+    }
+    public class RoundResultsStartCPacket
+    {
+        public float RoundResultsTime { get; set; }
+        public string RoundResults { get; set; }
     }
     public class ServerMessageCPacket
     {

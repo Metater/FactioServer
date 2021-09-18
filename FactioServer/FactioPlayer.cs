@@ -21,16 +21,16 @@ namespace FactioServer
             this.clientId = clientId;
         }
 
-        public void JoinGame(FactioGame game)
+        public void JoinLobby(FactioGame game)
         {
             if (InGame)
-                Game.LeaveGame(this);
+                Game.TryLeaveLobby(this);
             Game = game;
         }
-        public void LeaveGame()
+        public void LeaveLobby()
         {
             if (InGame)
-                Game.LeaveGame(this);
+                Game.TryLeaveLobby(this);
             Game = null;
         }
 
@@ -38,7 +38,7 @@ namespace FactioServer
         {
             IsReady = value;
             if (InGame)
-                Game.ReadyUpdate();
+                Game.GiveReadyUpdate();
         }
         public void Respond(string response)
         {

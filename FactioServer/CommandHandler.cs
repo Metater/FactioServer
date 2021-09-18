@@ -56,7 +56,7 @@ namespace FactioServer
                     OutputLine(LoggingTag.None, "\t\tlist");
                     break;
                 case "exit":
-                    factioServer.isExitRequested = true;
+                    factioServer.IsExitRequested = true;
                     break;
                 case "clear":
                     if (!redirectingOutput) Console.Clear();

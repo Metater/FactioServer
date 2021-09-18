@@ -48,7 +48,7 @@ namespace FactioServer
 
             string input = "";
             //int lastChar = -1;
-            while (!factioServer.isExitRequested)
+            while (!factioServer.IsExitRequested)
             {
                 factioServer.server.PollEvents();
                 lastTick.Stop();
@@ -91,7 +91,6 @@ namespace FactioServer
                 }
                 Thread.Sleep(factioServer.PollPeriod);
             }
-            factioServer.gameManager.ServerShutdown();
             factioServer.commandHandler.OutputLine(LoggingTag.FactioServer, "Exiting");
         }
 

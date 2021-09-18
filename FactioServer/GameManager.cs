@@ -38,7 +38,7 @@ namespace FactioServer
             }
             FactioGame game = new FactioGame(factioServer, joinCode, leader);
             games.Add(joinCode, game);
-            leader.JoinGame(game);
+            leader.JoinLobby(game);
             JoinedLobby(peer, joinCode);
             UpdatePlayersInGame(game);
             return true;
@@ -49,9 +49,9 @@ namespace FactioServer
             if (player.InGame) return false;
             if (games.TryGetValue(joinCode, out FactioGame game))
             {
-                if (game.TryJoinGame(player))
+                if (game.TryJoinLobby(player))
                 {
-                    player.JoinGame(game);
+                    player.JoinLobby(game);
                     JoinedLobby(peer, joinCode);
                     UpdatePlayersInGame(game);
                     return true;
@@ -60,16 +60,24 @@ namespace FactioServer
             return false;
         }
 
-        public bool EndLobby(FactioGame game)
+        public bool TryLeaveLobby(NetPeer peer, FactioPlayer player)
         {
-            return games.Remove(game.joinCode);
+            if (!player.InGame) return false;
+            player.Game.TryLeaveLobby(player);
+            UpdatePlayersInGame(player.Game);
+            return true;
+        }
+
+        public bool CloseLobby(FactioGame game)
+        {
+            return games.Remove(game.JoinCode);
         }
 
         public void ServerShutdown()
         {
             foreach (KeyValuePair<int, FactioGame> game in games)
             {
-                game.Value.EndGame(LobbyClose.ServerShutdown);
+                game.Value.CloseLobby(LobbyClose.ServerShutdown);
             }
         }
 
@@ -82,8 +90,9 @@ namespace FactioServer
 
         private void UpdatePlayersInGame(FactioGame game)
         {
+            (int[], string[]) players = game.GetPlayers();
             PlayerUpdateCPacket playerUpdate = new PlayerUpdateCPacket
-            { Usernames = game.GetUsernames() };
+            { PlayerIds = players.Item1, Usernames = players.Item2 };
             foreach (FactioPlayer player in game.players)
             {
                 NetPeer peer = factioServer.peerClientIdMap.GetPeer(player.clientId);

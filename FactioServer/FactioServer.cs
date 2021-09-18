@@ -14,7 +14,11 @@ namespace FactioServer
         public ScenarioRegistry scenarioRegistry;
         public CommandHandler commandHandler;
 
-        public bool isExitRequested = false;
+        public bool IsExitRequested { get { return IsExitRequested; } set
+        {
+            IsExitRequested = value;
+            if (IsExitRequested) ServerShutdown();
+        } }
 
         public bool IsDebugging { get; private set; } = false;
         public bool isDebuggingTicks = false;
@@ -70,7 +74,7 @@ namespace FactioServer
         public void PeerDisconnected(NetPeer peer)
         {
             FactioPlayer player = GetPlayer(peer);
-            player.LeaveGame();
+            player.LeaveLobby();
         }
 
         public FactioPlayer GetPlayer(int clientId)
@@ -80,6 +84,11 @@ namespace FactioServer
         public FactioPlayer GetPlayer(NetPeer peer)
         {
             return GetPlayer(peerClientIdMap.GetClientId(peer));
+        }
+
+        private void ServerShutdown()
+        {
+            gameManager.ServerShutdown();
         }
     }
 }

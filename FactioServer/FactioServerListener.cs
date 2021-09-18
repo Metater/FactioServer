@@ -90,7 +90,10 @@ namespace FactioServer
         private void OnLeaveLobbySPacketReceived(LeaveLobbySPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
-            player.LeaveGame();
+            if (factioServer.gameManager.TryLeaveLobby(peer, player))
+            {
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" left a lobby");
+            }
         }
         private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
         {
