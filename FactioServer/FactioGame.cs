@@ -124,12 +124,10 @@ namespace FactioServer
                 if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"Results Start, led by {players[0]}", true);
 
                 Scenario scenario = scenarios.Last();
-                string results = "Scenario\n";
-                results += $"\t{scenario.text}\n";
-                results += $"Votes\n";
+                string results = "Scenario:\n";
+                results += $"\t{scenario.text}\n\n";
                 FactioPlayer playerA = currentChosenPair.Item1;
                 FactioPlayer playerB = currentChosenPair.Item2;
-                results += $"{playerA.username}: {votes[playerA]}, {playerB.username}: {votes[playerB]}\n";
                 int playerAVotes = 0;
                 int playerBVotes = 0;
                 foreach (KeyValuePair<FactioPlayer, bool> vote in votes)
@@ -137,36 +135,45 @@ namespace FactioServer
                     if (!vote.Value) playerAVotes++;
                     else playerBVotes++;
                 }
-                int totalVotes = playerAVotes + playerAVotes;
-                int playerAPoints = (playerAVotes / totalVotes) * 1000;
-                int playerBPoints = (playerAVotes / totalVotes) * 1000;
-                if (playerAVotes == playerBVotes) // Tie
+                results += $"Votes\n";
+                results += $"{playerA.username}: {playerAVotes}, {playerB.username}: {playerBVotes}\n\n";
+                int totalVotes = playerAVotes + playerBVotes;
+                if (totalVotes == 0)
                 {
-                    results += $"Everyone is a winner, now take your participation trophy!\n";
-                    results += $"Tied!\n";
+                    results += $"Really, nobody voted, lame!";
                 }
-                else if (playerAVotes > playerBVotes) // Player A
-                {
-                    playerAPoints += 500;
-                    results += $"Winner: {playerA.username}";
-                    results += $"Winning Response: {playerAResponses[playerA]}";
-                }
-                else // Player B
-                {
-                    playerBPoints += 500;
-                    results += $"Winner: {playerB.username}";
-                    results += $"Winning Response: {playerBResponses[playerB]}";
-                }
-                results += $"Points\n";
-                results += $"{playerA.username}: +{playerAPoints}, {playerB.username}: +{playerBPoints}";
-                if (scores.ContainsKey(playerA))
-                    scores[playerA] += playerAPoints;
                 else
-                    scores.Add(playerA, playerAPoints);
-                if (scores.ContainsKey(playerB))
-                    scores[playerB] += playerBPoints;
-                else
-                    scores.Add(playerB, playerBPoints);
+                {
+                    int playerAPoints = (int)(((float)playerAVotes / (float)totalVotes) * 1000f);
+                    int playerBPoints = (int)(((float)playerBVotes / (float)totalVotes) * 1000f);
+                    if (playerAVotes == playerBVotes) // Tie
+                    {
+                        results += $"Everyone is a winner, now take your participation trophy!\n";
+                        results += $"Tied!\n";
+                    }
+                    else if (playerAVotes > playerBVotes) // Player A
+                    {
+                        playerAPoints += 500;
+                        results += $"Winner: {playerA.username}\n";
+                        results += $"Winning Response: {playerAResponses[playerA]}\n\n";
+                    }
+                    else // Player B
+                    {
+                        playerBPoints += 500;
+                        results += $"Winner: {playerB.username}\n";
+                        results += $"Winning Response: {playerBResponses[playerB]}\n\n";
+                    }
+                    results += $"Points\n";
+                    results += $"{playerA.username}: +{playerAPoints}, {playerB.username}: +{playerBPoints}";
+                    if (scores.ContainsKey(playerA))
+                        scores[playerA] += playerAPoints;
+                    else
+                        scores.Add(playerA, playerAPoints);
+                    if (scores.ContainsKey(playerB))
+                        scores[playerB] += playerBPoints;
+                    else
+                        scores.Add(playerB, playerBPoints);
+                }
                 ResultsStartCPacket resultsStart = new ResultsStartCPacket
                 { ResultsTime = factioServer.configRegistry.GetFloatConfig("resultsTime"), Results = results };
                 SendResultsStart(resultsStart);
@@ -250,7 +257,7 @@ namespace FactioServer
             int playerIndex = players.IndexOf(player);
 
             if (playerIndex == 0) CloseLobby(LobbyClose.LeaderLeft);
-            if (players.Count <= 1) CloseLobby(LobbyClose.OnlyPlayer);
+            if (players.Count - 1 <= 1) CloseLobby(LobbyClose.OnlyPlayer);
 
             players.Remove(player);
             return true;

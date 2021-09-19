@@ -63,8 +63,9 @@ namespace FactioServer
         public bool TryLeaveLobby(NetPeer peer, FactioPlayer player)
         {
             if (!player.InGame) return false;
-            player.Game.TryLeaveLobby(player);
-            UpdatePlayersInGame(player.Game);
+            FactioGame game = player.Game;
+            player.LeaveLobby();
+            if (game.players.Count > 0) UpdatePlayersInGame(game);
             return true;
         }
 
