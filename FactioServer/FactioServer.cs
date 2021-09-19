@@ -14,11 +14,7 @@ namespace FactioServer
         public ScenarioRegistry scenarioRegistry;
         public CommandHandler commandHandler;
 
-        public bool IsExitRequested { get { return IsExitRequested; } set
-        {
-            IsExitRequested = value;
-            if (IsExitRequested) ServerShutdown();
-        } }
+        public bool isExitRequested = false;
 
         public bool IsDebugging { get; private set; } = false;
         public bool isDebuggingTicks = false;
@@ -86,7 +82,7 @@ namespace FactioServer
             return GetPlayer(peerClientIdMap.GetClientId(peer));
         }
 
-        private void ServerShutdown()
+        public void ServerShutdown()
         {
             gameManager.ServerShutdown();
         }

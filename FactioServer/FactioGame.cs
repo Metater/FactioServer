@@ -123,8 +123,53 @@ namespace FactioServer
             {
                 if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"Results Start, led by {players[0]}", true);
 
-
-                SendResultsStart();
+                Scenario scenario = scenarios.Last();
+                string results = "Scenario\n";
+                results += $"\t{scenario.text}\n";
+                results += $"Votes\n";
+                FactioPlayer playerA = currentChosenPair.Item1;
+                FactioPlayer playerB = currentChosenPair.Item2;
+                results += $"{playerA.username}: {votes[playerA]}, {playerB.username}: {votes[playerB]}\n";
+                int playerAVotes = 0;
+                int playerBVotes = 0;
+                foreach (KeyValuePair<FactioPlayer, bool> vote in votes)
+                {
+                    if (!vote.Value) playerAVotes++;
+                    else playerBVotes++;
+                }
+                int totalVotes = playerAVotes + playerAVotes;
+                int playerAPoints = (playerAVotes / totalVotes) * 1000;
+                int playerBPoints = (playerAVotes / totalVotes) * 1000;
+                if (playerAVotes == playerBVotes) // Tie
+                {
+                    results += $"Everyone is a winner, now take your participation trophy!\n";
+                    results += $"Tied!\n";
+                }
+                else if (playerAVotes > playerBVotes) // Player A
+                {
+                    playerAPoints += 500;
+                    results += $"Winner: {playerA.username}";
+                    results += $"Winning Response: {playerAResponses[playerA]}";
+                }
+                else // Player B
+                {
+                    playerBPoints += 500;
+                    results += $"Winner: {playerB.username}";
+                    results += $"Winning Response: {playerBResponses[playerB]}";
+                }
+                results += $"Points\n";
+                results += $"{playerA.username}: +{playerAPoints}, {playerB.username}: +{playerBPoints}";
+                if (scores.ContainsKey(playerA))
+                    scores[playerA] += playerAPoints;
+                else
+                    scores.Add(playerA, playerAPoints);
+                if (scores.ContainsKey(playerB))
+                    scores[playerB] += playerBPoints;
+                else
+                    scores.Add(playerB, playerBPoints);
+                ResultsStartCPacket resultsStart = new ResultsStartCPacket
+                { ResultsTime = factioServer.configRegistry.GetFloatConfig("resultsTime"), Results = results };
+                SendResultsStart(resultsStart);
             }
             if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("resultsTime"))
             {
@@ -144,7 +189,7 @@ namespace FactioServer
             {
                 if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"Round Results Start, led by {players[0]}", true);
 
-                SendRoundResultsStart();
+                //SendRoundResultsStart();
             }
             if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("roundResultsTime"))
             {
@@ -341,7 +386,8 @@ namespace FactioServer
                 votes[player] = voteIsB;
             else
                 votes.Add(player, voteIsB);
-            players.ForEach((p) => { if (!p.HasVoted) return; });
+            foreach (FactioPlayer p in players) 
+                if (!p.HasVoted) return;
             UpdatePhase(GamePhase.Results);
         }
         #endregion PlayerInputMethods
