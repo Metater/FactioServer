@@ -67,15 +67,14 @@ namespace FactioShared
         //public int ScenarioThemeIndex { get; set; }
         public float ResponseTime { get; set; }
         public string Scenario { get; set; }
-        public short PlayerAIndex { get; set; } // -1 if your not participating
-        public short PlayerBIndex { get; set; } // -1 if your not participating
+        public int PlayerAId { get; set; } // -1 if your not participating
+        public int PlayerBId { get; set; } // -1 if your not participating
     }
     // Packets that happen within voting
     // Multiple groups of scenarios if more people later
     public class VotingStartCPacket
     {
         public float VotingTime { get; set; }
-        // Contains responses to scenario
         public string PlayerAResponse { get; set; }
         public string PlayerBResponse { get; set; }
     }
@@ -84,11 +83,7 @@ namespace FactioShared
     public class ResultsStartCPacket
     {
         public float ResultsTime { get; set; }
-        public short PlayerAVoteCount { get; set; }
-        public short PlayerBVoteCount { get; set; }
-        public short PlayerAIndex { get; set; }
-        public short PlayerBIndex { get; set; }
-        // eventually ad everyone's score
+        public string Results { get; set; }
     }
     public class RoundResultsStartCPacket
     {

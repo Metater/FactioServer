@@ -193,8 +193,9 @@ namespace FactioServer
             if (!TryGetIntConfig("password", out _)) intConfigs.Add("password", factioServer.rand.Next(0, int.MaxValue));
             if (!TryGetFloatConfig("responseTime", out _)) floatConfigs.Add("responseTime", 60);
             if (!TryGetFloatConfig("votingTime", out _)) floatConfigs.Add("votingTime", 30);
-            if (!TryGetFloatConfig("resultsTime", out _)) floatConfigs.Add("resultsTime", 15);
+            if (!TryGetFloatConfig("resultsTime", out _)) floatConfigs.Add("resultsTime", 10);
             if (!TryGetFloatConfig("roundResultsTime", out _)) floatConfigs.Add("roundResultsTime", 20);
+            if (!TryGetIntConfig("roundsPerGame", out _)) intConfigs.Add("roundsPerGame", 3);
             if (!TryGetBoolConfig("isDebugging", out _)) boolConfigs.Add("isDebugging", true);
             if (!TryGetBoolConfig("isDebuggingTicks", out _)) boolConfigs.Add("isDebuggingTicks", false);
         }

@@ -74,7 +74,7 @@ namespace FactioServer
             player.username = packet.Username;
             if (factioServer.gameManager.TryCreateLobby(peer, player))
             {
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client { player.clientId} named \"{player.username}\" made a lobby");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} made a lobby");
             }
         }
         private void OnJoinLobbySPacketReceived(JoinLobbySPacket packet, NetPeer peer)
@@ -84,7 +84,7 @@ namespace FactioServer
             player.username = packet.Username;
             if (factioServer.gameManager.TryJoinLobby(peer, player, packet.JoinCode))
             {
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" joined a lobby");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} joined a lobby");
             }
         }
         private void OnLeaveLobbySPacketReceived(LeaveLobbySPacket packet, NetPeer peer)
@@ -92,16 +92,16 @@ namespace FactioServer
             FactioPlayer player = factioServer.GetPlayer(peer);
             if (factioServer.gameManager.TryLeaveLobby(peer, player))
             {
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" left a lobby");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} left a lobby");
             }
         }
         private void OnReadySPacketReceived(ReadySPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
             if (packet.Value)
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" is ready");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} is ready");
             else
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client {player.clientId} named \"{player.username}\" is not ready");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} is not ready");
             player.Ready(packet.Value);
         }
         private void OnResponseSPacketReceived(ResponseSPacket packet, NetPeer peer)
@@ -119,7 +119,7 @@ namespace FactioServer
             FactioPlayer player = factioServer.GetPlayer(peer);
             if (packet.password == factioServer.configRegistry.GetIntConfig("password"))
             {
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client with id {player.clientId} and ip {peer.EndPoint.Address}, named \"{player.username}\" is executing a command: {packet.command}");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} and ip {peer.EndPoint.Address} is executing a command: {packet.command}");
                 string output = factioServer.commandHandler.Handle(packet.command, true);
                 ServerMessageCPacket serverMessage = new ServerMessageCPacket
                 { Message = output };
@@ -127,7 +127,7 @@ namespace FactioServer
             }
             else
             {
-                Program.LogLine(LoggingTag.FactioServerListener, $"Client with id {player.clientId} and ip {peer.EndPoint.Address}, named \"{player.username}\" attempted to execute a command: {packet.command}");
+                Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} and ip {peer.EndPoint.Address} attempted to execute a command: {packet.command}");
                 ServerMessageCPacket serverMessage = new ServerMessageCPacket
                 { Message = "[Factio Server] Incorrect password" };
                 peer.Send(packetProcessor.Write(serverMessage), DeliveryMethod.ReliableOrdered);

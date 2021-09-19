@@ -81,7 +81,7 @@ namespace FactioServer
             }
         }
 
-        private void JoinedLobby(NetPeer peer, int joinCode)
+        public void JoinedLobby(NetPeer peer, int joinCode)
         {
             JoinedLobbyCPacket joinedLobby = new JoinedLobbyCPacket
             { JoinCode = joinCode };

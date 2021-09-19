@@ -16,6 +16,8 @@ namespace FactioServer
         public bool HasResponded { get; private set; } = false;
         public bool HasVoted { get; private set; } = false;
 
+        public PlayerType playerType = PlayerType.None;
+
         public FactioPlayer(int clientId)
         {
             this.clientId = clientId;
@@ -57,6 +59,19 @@ namespace FactioServer
         {
             HasResponded = false;
             HasVoted = false;
+            playerType = PlayerType.None;
         }
+
+        public override string ToString()
+        {
+            return $"\"{username}\", id {clientId}";
+        }
+    }
+
+    public enum PlayerType
+    {
+        None,
+        PlayerA,
+        PlayerB
     }
 }
