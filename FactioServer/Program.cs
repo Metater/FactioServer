@@ -13,7 +13,7 @@ namespace FactioServer
         public static void Main(string[] args)
         {
             LogLine(LoggingTag.FactioServer, "Hello World!");
-            LogLine(LoggingTag.FactioServer, "Factio Server v0.3");
+            LogLine(LoggingTag.FactioServer, "Factio Server v0.4");
             LogLine(LoggingTag.FactioServer, "Starting server...");
 
             long SystemTPS;
@@ -86,7 +86,7 @@ namespace FactioServer
                         }
                     }
                     else
-                        if (char.IsLetterOrDigit(c) || c == ' ') input += c;
+                        if (char.IsLetterOrDigit(c) || c == ' ' || char.IsPunctuation(c)) input += c;
                     //lastChar = c;
                 }
                 Thread.Sleep(factioServer.PollPeriod);

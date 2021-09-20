@@ -111,15 +111,37 @@ namespace FactioServer
                     switch (commandSplit[1])
                     {
                         case "add":
-                            if (TermCountError(command, 3)) return CommandReturn();
-                            string scenarioText = command.Substring(command.IndexOf(commandSplit[1]) + commandSplit[1].Length);
-                            factioServer.scenarioRegistry.AddScenario(scenarioText);
+                            string scenarioTextToAdd = command.Substring(command.IndexOf(commandSplit[1]) + commandSplit[1].Length + 1);
+                            factioServer.scenarioRegistry.AddScenario(scenarioTextToAdd);
+                            OutputLine(LoggingTag.ConfigRegistry, $"Added scenario \"{scenarioTextToAdd}\"");
                             break;
                         case "remove":
                             if (TermCountError(command, 3)) return CommandReturn();
+                            if (int.TryParse(commandSplit[2], out int scenarioIdToRemove))
+                            {
+                                if (!factioServer.scenarioRegistry.RemoveScenario(scenarioIdToRemove))
+                                    OutputLine(LoggingTag.ConfigRegistry, $"Could not remove scenario");
+                                else
+                                    OutputLine(LoggingTag.ConfigRegistry, $"Removed scenario with id {scenarioIdToRemove}");
+                            }
+                            else
+                            {
+                                OutputLine(LoggingTag.ConfigRegistry, $"Could not parse scenarioId");
+                            }
                             break;
                         case "replace":
-                            if (TermCountError(command, 4)) return CommandReturn();
+                            if (int.TryParse(commandSplit[2], out int scenarioIdToReplace))
+                            {
+                                string scenarioTextToReplace = command.Substring(command.IndexOf(commandSplit[2]) + commandSplit[2].Length + 1);
+                                if (!factioServer.scenarioRegistry.ReplaceScenario(scenarioIdToReplace, scenarioTextToReplace))
+                                    OutputLine(LoggingTag.ConfigRegistry, $"Could not replace scenario");
+                                else
+                                    OutputLine(LoggingTag.ConfigRegistry, $"Replaced scenario with id {scenarioIdToReplace}");
+                            }
+                            else
+                            {
+                                OutputLine(LoggingTag.ConfigRegistry, $"Could not parse scenarioId");
+                            }
                             break;
                         case "list":
                             factioServer.scenarioRegistry.ListScenarios();
