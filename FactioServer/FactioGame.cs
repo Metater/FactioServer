@@ -125,9 +125,9 @@ namespace FactioServer
 
                 Scenario scenario = scenarios.Last();
                 string results = "Scenario:\n";
-                results += $"\t{scenario.text}\n\n";
                 FactioPlayer playerA = currentChosenPair.Item1;
                 FactioPlayer playerB = currentChosenPair.Item2;
+                results += $"\t{scenario.Compile(playerA.username, playerB.username)}\n\n";
                 int playerAVotes = 0;
                 int playerBVotes = 0;
                 foreach (KeyValuePair<FactioPlayer, bool> vote in votes)
