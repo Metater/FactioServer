@@ -196,7 +196,29 @@ namespace FactioServer
             {
                 if (factioServer.IsDebugging) Program.LogLine(LoggingTag.FactioGame, $"Round Results Start, led by {players[0]}", true);
 
-                //SendRoundResultsStart();
+                List<KeyValuePair<FactioPlayer, int>> unsortedScores = new List<KeyValuePair<FactioPlayer, int>>(scores);
+                List<KeyValuePair<FactioPlayer, int>> sortedScores = new List<KeyValuePair<FactioPlayer, int>>();
+                for (int i = 0; i < scores.Count || i < 10; i++)
+                {
+                    KeyValuePair<FactioPlayer, int> greatestScore = new KeyValuePair<FactioPlayer, int>(null, int.MinValue);
+                    for (int j = 0; j < unsortedScores.Count; j++)
+                    {
+                        if (unsortedScores[j].Value > greatestScore.Value)
+                        {
+                            greatestScore = unsortedScores[j];
+                            unsortedScores.RemoveAt(j);
+                            sortedScores.Add(greatestScore);
+                            break;
+                        }
+                    }
+                }
+
+                string roundResults = "Leaderboard:\n\n";
+                foreach (KeyValuePair<FactioPlayer, int> score in sortedScores)
+                    roundResults += $"{score.Key.username}: {score.Value}\n";
+                RoundResultsStartCPacket roundResultsStart = new RoundResultsStartCPacket
+                { RoundResultsTime = factioServer.configRegistry.GetFloatConfig("roundResultsTime"), RoundResults = roundResults };
+                SendRoundResultsStart(roundResultsStart);
             }
             if (phaseDepthSeconds > factioServer.configRegistry.GetFloatConfig("roundResultsTime"))
             {
@@ -325,7 +347,7 @@ namespace FactioServer
         }
         private void EndRound()
         {
-            if (roundIndex < factioServer.configRegistry.GetIntConfig("roundsPerGame"))
+            if (roundIndex < factioServer.configRegistry.GetIntConfig("roundsPerGame") - 1)
             {
                 roundIndex++;
                 StartRound();
@@ -346,7 +368,6 @@ namespace FactioServer
         public void GiveReadyUpdate()
         {
             if (HasGameStarted) return;
-            if (players.Count < 2) return;
             List<int> readyPlayerIds = new List<int>();
             bool canStart = true;
             foreach (FactioPlayer player in players)
@@ -354,8 +375,9 @@ namespace FactioServer
                 if (!player.IsReady) canStart = false;
                 else readyPlayerIds.Add(player.clientId);
             }
-            if (!canStart) SendReadyUpdate(new ReadyUpdateCPacket { ReadyPlayerIds = readyPlayerIds.ToArray() });
-            else StartGame();
+            SendReadyUpdate(new ReadyUpdateCPacket { ReadyPlayerIds = readyPlayerIds.ToArray() });
+            if (players.Count < 2) return;
+            if (canStart) StartGame();
         }
 
         public void GiveResponse(FactioPlayer player, string response)
