@@ -7,14 +7,13 @@ namespace FactioServer
 {
     public class PeerClientIdMap
     {
-        private List<(NetPeer, int)> peerClientIdMap = new List<(NetPeer, int)>();
+        private readonly List<(NetPeer, int)> peerClientIdMap = new();
         private int nextClientId = 0;
 
         public int AddPeer(NetPeer peer)
         {
             peerClientIdMap.Add((peer, nextClientId));
-            nextClientId++;
-            return nextClientId - 1;
+            return nextClientId++;
         }
 
         public int GetClientId(NetPeer peer)

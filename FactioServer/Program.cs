@@ -12,8 +12,8 @@ namespace FactioServer
 
         public static void Main(string[] args)
         {
-            LogLine(LoggingTag.FactioServer, "Hello World!");
-            LogLine(LoggingTag.FactioServer, "Factio Server v0.4");
+            LogLine(LoggingTag.FactioServer, "Hello, World!");
+            LogLine(LoggingTag.FactioServer, "Factio Server v0.5");
             LogLine(LoggingTag.FactioServer, "Starting server...");
 
             long SystemTPS;
@@ -34,7 +34,7 @@ namespace FactioServer
             }
             long TimePerTick = (long)(SystemTPS / TPS);
 
-            FactioServer factioServer = new FactioServer();
+            FactioServer factioServer = new();
 
             LogLine(LoggingTag.FactioServer, "Started polling for incoming data");
 

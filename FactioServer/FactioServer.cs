@@ -18,17 +18,14 @@ namespace FactioServer
 
         public bool IsDebugging { get; private set; } = false;
         public bool isDebuggingTicks = false;
-        public int PollPeriod { get; private set; } = 1; // could add command for adjusting later
+        public int PollPeriod { get; private set; } = 1;
 
-        public PeerClientIdMap peerClientIdMap = new PeerClientIdMap();
-        public List<FactioPlayer> players = new List<FactioPlayer>();
+        public PeerClientIdMap peerClientIdMap = new();
+        public List<FactioPlayer> players = new();
 
-        public Random rand = new Random();
+        public Random rand = new();
 
         public long lastTick = 0;
-
-
-        // bools use is, has can
 
         public FactioServer()
         {
@@ -62,7 +59,7 @@ namespace FactioServer
         public FactioPlayer PeerConnected(NetPeer peer)
         {
             int clientId = peerClientIdMap.AddPeer(peer);
-            FactioPlayer player = new FactioPlayer(clientId);
+            FactioPlayer player = new(clientId);
             players.Add(player);
             return player;
         }

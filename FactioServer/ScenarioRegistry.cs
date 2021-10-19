@@ -8,11 +8,11 @@ namespace FactioServer
 {
     public class ScenarioRegistry
     {
-        private FactioServer factioServer;
+        private readonly FactioServer factioServer;
 
-        private string scenarioRegistryPath => $"{Directory.GetCurrentDirectory()}/scenarios.reg";
+        private static string ScenarioRegistryPath => $"{Directory.GetCurrentDirectory()}/scenarios.reg";
 
-        private List<Scenario> scenarios = new List<Scenario>();
+        private readonly List<Scenario> scenarios = new();
 
         public ScenarioRegistry(FactioServer factioServer)
         {
@@ -51,10 +51,10 @@ namespace FactioServer
 
         public void LoadScenarios()
         {
-            if (File.Exists(scenarioRegistryPath))
+            if (File.Exists(ScenarioRegistryPath))
             {
                 factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "Loading the scenario registry");
-                string[] unloadedScenarios = File.ReadAllLines(scenarioRegistryPath);
+                string[] unloadedScenarios = File.ReadAllLines(ScenarioRegistryPath);
 
                 for (int i = 0; i < unloadedScenarios.Length; i++)
                     scenarios.Add(Scenario.Load(i, unloadedScenarios[i]));
@@ -66,7 +66,7 @@ namespace FactioServer
             else
             {
                 factioServer.commandHandler.OutputLine(LoggingTag.ScenarioRegistry, "No scenarios found, creating empty file");
-                File.WriteAllText(scenarioRegistryPath, "");
+                File.WriteAllText(ScenarioRegistryPath, "");
             }
         }
 
@@ -79,9 +79,9 @@ namespace FactioServer
 
         private void SaveScenarios()
         {
-            List<string> unloadedScenarios = new List<string>();
+            List<string> unloadedScenarios = new();
             foreach (Scenario scenario in scenarios) unloadedScenarios.Add($"\"{scenario.text}\"");
-            File.WriteAllLines(scenarioRegistryPath, unloadedScenarios.ToArray());
+            File.WriteAllLines(ScenarioRegistryPath, unloadedScenarios.ToArray());
         }
 
         private void RefreshIds()

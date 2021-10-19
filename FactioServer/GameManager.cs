@@ -8,9 +8,9 @@ namespace FactioServer
 {
     public class GameManager : ITickable
     {
-        private FactioServer factioServer;
+        private readonly FactioServer factioServer;
 
-        public Dictionary<int, FactioGame> games = new Dictionary<int, FactioGame>();
+        public Dictionary<int, FactioGame> games = new();
 
         public GameManager(FactioServer factioServer)
         {
@@ -27,7 +27,7 @@ namespace FactioServer
 
         public bool TryCreateLobby(NetPeer peer, FactioPlayer leader)
         {
-            if (leader.InGame) return false;
+            if (leader.IsInGame) return false;
             int joinCode = -1;
             int tries = 0;
             while (games.ContainsKey(joinCode) || tries == 0)
@@ -36,7 +36,7 @@ namespace FactioServer
                 joinCode = factioServer.rand.Next(1000, 10000);
                 tries++;
             }
-            FactioGame game = new FactioGame(factioServer, joinCode, leader);
+            FactioGame game = new(factioServer, joinCode, leader);
             games.Add(joinCode, game);
             leader.JoinLobby(game);
             JoinedLobby(peer, joinCode);
@@ -46,7 +46,7 @@ namespace FactioServer
 
         public bool TryJoinLobby(NetPeer peer, FactioPlayer player, int joinCode)
         {
-            if (player.InGame) return false;
+            if (player.IsInGame) return false;
             if (games.TryGetValue(joinCode, out FactioGame game))
             {
                 if (game.TryJoinLobby(player))
@@ -60,9 +60,9 @@ namespace FactioServer
             return false;
         }
 
-        public bool TryLeaveLobby(NetPeer peer, FactioPlayer player)
+        public bool TryLeaveLobby(FactioPlayer player)
         {
-            if (!player.InGame) return false;
+            if (!player.IsInGame) return false;
             FactioGame game = player.Game;
             player.LeaveLobby();
             if (game.players.Count > 0) UpdatePlayersInGame(game);
@@ -84,7 +84,7 @@ namespace FactioServer
 
         public void JoinedLobby(NetPeer peer, int joinCode)
         {
-            JoinedLobbyCPacket joinedLobby = new JoinedLobbyCPacket
+            JoinedLobbyCPacket joinedLobby = new()
             { JoinCode = joinCode };
             peer.Send(factioServer.listener.packetProcessor.Write(joinedLobby), DeliveryMethod.ReliableOrdered);
         }
@@ -92,7 +92,7 @@ namespace FactioServer
         private void UpdatePlayersInGame(FactioGame game)
         {
             (int[], string[]) players = game.GetPlayers();
-            PlayerUpdateCPacket playerUpdate = new PlayerUpdateCPacket
+            PlayerUpdateCPacket playerUpdate = new()
             { PlayerIds = players.Item1, Usernames = players.Item2 };
             foreach (FactioPlayer player in game.players)
             {

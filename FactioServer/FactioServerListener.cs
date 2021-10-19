@@ -12,9 +12,9 @@ namespace FactioServer
 {
     public class FactioServerListener : INetEventListener
     {
-        private FactioServer factioServer;
+        private readonly FactioServer factioServer;
 
-        public NetPacketProcessor packetProcessor = new NetPacketProcessor();
+        public NetPacketProcessor packetProcessor = new();
 
         public FactioServerListener(FactioServer factioServer)
         {
@@ -90,7 +90,7 @@ namespace FactioServer
         private void OnLeaveLobbySPacketReceived(LeaveLobbySPacket packet, NetPeer peer)
         {
             FactioPlayer player = factioServer.GetPlayer(peer);
-            if (factioServer.gameManager.TryLeaveLobby(peer, player))
+            if (factioServer.gameManager.TryLeaveLobby(player))
             {
                 Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} left a lobby");
             }
@@ -121,14 +121,14 @@ namespace FactioServer
             {
                 Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} and ip {peer.EndPoint.Address} is executing a command: {packet.command}");
                 string output = factioServer.commandHandler.Handle(packet.command, true);
-                ServerMessageCPacket serverMessage = new ServerMessageCPacket
+                ServerMessageCPacket serverMessage = new()
                 { Message = output };
                 peer.Send(packetProcessor.Write(serverMessage), DeliveryMethod.ReliableOrdered);
             }
             else
             {
                 Program.LogLine(LoggingTag.FactioServerListener, $"Client named {player} and ip {peer.EndPoint.Address} attempted to execute a command: {packet.command}");
-                ServerMessageCPacket serverMessage = new ServerMessageCPacket
+                ServerMessageCPacket serverMessage = new()
                 { Message = "[Factio Server] Incorrect password" };
                 peer.Send(packetProcessor.Write(serverMessage), DeliveryMethod.ReliableOrdered);
             }
