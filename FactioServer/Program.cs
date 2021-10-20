@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -47,7 +48,8 @@ namespace FactioServer
             long nextTickId = 0;
 
             string input = "";
-            //int lastChar = -1;
+            int commandIndex = 0;
+            string[] pastCommands = new string[64];
             while (!factioServer.isExitRequested)
             {
                 factioServer.server.PollEvents();
@@ -60,10 +62,11 @@ namespace FactioServer
                     factioServer.Tick(nextTickId);
                     if (factioServer.isDebuggingTicks) LogLine(LoggingTag.FactioServer, "Tick: " + nextTickId, true);
                     nextTickId++;
-                    if (File.Exists($"{Directory.GetCurrentDirectory()}/quit.req"))
+                    string quitReqPath = $"{Directory.GetCurrentDirectory()}/quit.req";
+                    if (File.Exists(quitReqPath))
                     {
                         factioServer.commandHandler.Handle("exit");
-                        File.Delete($"{Directory.GetCurrentDirectory()}/quit.req");
+                        File.Delete(quitReqPath);
                     }
                 }
                 if (Console.KeyAvailable)
@@ -72,27 +75,81 @@ namespace FactioServer
                     char c = key.KeyChar;
                     if (c == 13) // Is newline
                     {
-                        if (input != "") factioServer.commandHandler.Handle(input);
+                        if (input != "")
+                        {
+                            factioServer.commandHandler.Handle(input);
+                            PushCommand(input, pastCommands);
+                        }
                         else Console.WriteLine();
                         input = "";
+                        commandIndex = 0;
+                    }
+                    // TODO When entering lookback mode, it goes back one too many, dont go back any when its opened
+                    else if (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.LeftArrow)
+                    {
+                        if (!string.IsNullOrEmpty(pastCommands[commandIndex + 1]))
+                        {
+                            commandIndex++;
+                            ClearCurrentConsoleLine(input.Length);
+                            string command = pastCommands[commandIndex];
+                            Console.Write(command);
+                            input = command;
+                        }
+                    }
+                    else if (key.Key == ConsoleKey.DownArrow || key.Key == ConsoleKey.RightArrow)
+                    {
+                        if (commandIndex != 0)
+                        {
+                            commandIndex--;
+                            ClearCurrentConsoleLine(input.Length);
+                            string command = pastCommands[commandIndex];
+                            Console.Write(command);
+                            input = command;
+                        }
                     }
                     else if (c == 8 || c == 127) // Is backspace
                     {
                         if (input.Length > 0)
                         {
+                            ClearCurrentConsoleLine(input.Length);
                             input = input.Remove(input.Length - 1);
-                            //if (lastChar != 8 && lastChar != 127) Console.WriteLine();
-                            Console.Write("\n" + input);
+                            Console.Write(input);
                         }
                     }
+                    else if (char.IsLetterOrDigit(c) || c == ' ' || char.IsPunctuation(c))
+                        input += c;
                     else
-                        if (char.IsLetterOrDigit(c) || c == ' ' || char.IsPunctuation(c)) input += c;
-                    //lastChar = c;
+                        ClearCurrentCharacter();
                 }
                 Thread.Sleep(factioServer.PollPeriod);
             }
             factioServer.ServerShutdown();
             factioServer.commandHandler.OutputLine(LoggingTag.FactioServer, "Exiting");
+        }
+
+        public static void ClearCurrentConsoleLine(int width)
+        {
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            for (int i = 0; i < width; i++)
+                Console.Write(" ");
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
+
+        public static void ClearCurrentCharacter()
+        {
+            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+            Console.Write(" ");
+            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+        }
+
+        private static void PushCommand(string command, string[] pastCommands)
+        {
+            for (int i = pastCommands.Length - 2; i >= 0; i--)
+            {
+                pastCommands[i + 1] = pastCommands[i];
+            }
+            pastCommands[0] = command;
         }
 
         public static string GetLoggingTag(LoggingTag loggingTag, bool debug = false)
